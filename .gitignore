@@ -1,0 +1,5 @@
+.envrc
+talosconfig
+kubeconfig
+worker.yaml
+controlplane.yaml
