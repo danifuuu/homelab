@@ -1,5 +1,11 @@
 .envrc
+.vscode
+
 talosconfig
 kubeconfig
 worker.yaml
 controlplane.yaml
+
+*.tfvars
+*.tfstate
+*.terraform*
