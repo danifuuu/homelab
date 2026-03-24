@@ -20,3 +20,12 @@ talosctl apply-config --insecure --nodes <IP> --file controlplane.yaml
 ``` bash
 talosctl bootstrap --nodes <IP>
 ```
+
+# Upgrading talos image
+## Generate your new talos image
+Go here: https://factory.talos.dev/ and generate your custom image.
+
+## Update your instance:
+```bash
+talosctl upgrade --image <factory-url> --nodes <IP>
+```

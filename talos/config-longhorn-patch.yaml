@@ -1,0 +1,13 @@
+# talosctl -n <IP> patch mc --patch @talos/config-longhorn.patch.yaml
+machine:
+  kubelet:
+    extraMounts:
+      # longhorn requires an explicit mount
+      # this is straight to the boot disc
+      - destination: /var/lib/longhorn
+        type: bind
+        source: /var/lib/longhorn
+        options:
+          - bind
+          - rshared
+          - rw
