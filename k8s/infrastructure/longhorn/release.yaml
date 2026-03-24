@@ -12,3 +12,14 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: longhorn
+  values:
+    persistence:
+      defaultClassReplicaCount: 2
+    longhornUI:
+      replicas: 1
+    csi:
+      attacherReplicaCount: 2
+      provisionerReplicaCount: 2
+      resizerReplicaCount: 2
+      snapshotterReplicaCount: 2
+
