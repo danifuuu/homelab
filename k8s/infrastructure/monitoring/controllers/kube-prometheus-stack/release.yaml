@@ -40,6 +40,3 @@ spec:
     grafana:
       defaultDashboardsEnabled: false
       adminPassword: flux
-      service:
-        type: LoadBalancer
-

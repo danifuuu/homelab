@@ -4,6 +4,7 @@ namespace: monitoring
 resources:
   - repository.yaml
   - release.yaml
+  - httpRoute-grafana.yaml
 configMapGenerator:
   - name: flux-kube-state-metrics-config
     files:
