@@ -6,3 +6,5 @@ resources:
   - ./namespace.yaml
   - ./repository.yaml
   - ./release.yaml
+  - ./gatewayClass.yaml
+  - ./gateway.yaml
