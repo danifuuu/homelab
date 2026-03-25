@@ -43,3 +43,12 @@ extraArgs:
   - --source=gateway-httproute
   - --txt-owner-id=homelab-cluster
   - --domain-filter=home.arpa
+
+rbac:
+  additionalPermissions:
+    - apiGroups: ["gateway.networking.k8s.io"]
+      resources: ["gateways", "httproutes"]
+      verbs: ["get", "watch", "list"]
+    - apiGroups: [""]
+      resources: ["namespaces"]
+      verbs: ["get", "watch", "list"]
