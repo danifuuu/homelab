@@ -1,0 +1,10 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default-pool
+  namespace: metallb-system
+spec:
+ # My Home DHCP pool is assigning IPs from 192.168.1.33 to 192.168.1.199.
+ # Using the rest of the range within the network 192.168.1.0/24
+  addresses:
+  - 192.168.1.200-192.168.1.254
