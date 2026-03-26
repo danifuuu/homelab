@@ -13,11 +13,11 @@ spec:
         kind: HelmRepository
         name: jellyfin
         namespace: jellyfin
-  values:
-    httpRoute:
-      enabled: true
-      parentRefs:
-        - name: homelab-gateway
-          namespace: default
-      hostnames:
-        - jellyfin.homelab.home.arpa
+  # values:
+  #   httpRoute:
+  #     enabled: true
+  #     parentRefs:
+  #       - name: homelab-gateway
+  #         namespace: default
+  #     hostnames:
+  #       - jellyfin.homelab.home.arpa
