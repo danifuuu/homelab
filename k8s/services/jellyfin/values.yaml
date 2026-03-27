@@ -9,3 +9,7 @@ extraContainers:
       name: media
     - mountPath: /usr/src/app/logs/
       name: media
+
+persistence:
+  config:
+    size: 20Gi # Increased size to store logs/metadata
