@@ -1,0 +1,6 @@
+extraContainers:
+  - name: m3uparser
+    image: xaque87/m3uparser:latest
+    envFrom:
+      - secretRef:
+          name: jellyfin-secret

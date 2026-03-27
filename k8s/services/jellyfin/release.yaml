@@ -21,3 +21,7 @@ spec:
   #         namespace: default
   #     hostnames:
   #       - jellyfin.homelab.home.arpa
+  valuesFrom:
+    - kind: ConfigMap
+      name: jellyfin-values
+      valuesKey: values.yaml

@@ -9,3 +9,5 @@ controlplane.yaml
 *.tfvars
 *.tfstate
 *.terraform*
+
+*.secret.yaml
