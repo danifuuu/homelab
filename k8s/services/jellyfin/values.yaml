@@ -13,3 +13,8 @@ extraContainers:
 persistence:
   config:
     size: 20Gi # Increased size to store logs/metadata
+
+# finally! adding gpu support for hardware acceleration of transcoding tasks
+resources:
+  limits:
+    gpu.intel.com/i915: 1
