@@ -24,3 +24,6 @@ metrics:
   serviceMonitor:
     enabled: true
     interval: 60s
+
+nodeSelector:
+  node-role.kubernetes.io/worker: ""
