@@ -13,3 +13,4 @@ spec:
         kind: HelmRepository
         name: intel-device-plugin
   values:
+    sharedDevNum: 2
