@@ -27,3 +27,6 @@ metrics:
 
 nodeSelector:
   node-role.kubernetes.io/worker: ""
+
+deploymentStrategy:
+  type: Recreate
