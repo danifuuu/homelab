@@ -6,6 +6,7 @@ resources:
   - ./repository.yaml
   - ./release.yaml
   - ./httpRoute.yaml
+  - ./cronjob.yaml
 
 configMapGenerator:
   - name: jellyfin-values

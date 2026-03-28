@@ -1,14 +1,14 @@
-extraContainers:
-  - name: m3uparser
-    image: danifuu/m3uparser:latest
-    envFrom:
-      - secretRef:
-          name: jellyfin-secret
-    volumeMounts:
-    - mountPath: /usr/src/app/VODS
-      name: media
-    - mountPath: /usr/src/app/logs/
-      name: media
+# extraContainers:
+#   - name: m3uparser
+#     image: danifuu/m3uparser:latest
+#     envFrom:
+#       - secretRef:
+#           name: jellyfin-secret
+#     volumeMounts:
+#     - mountPath: /usr/src/app/VODS
+#       name: media
+#     - mountPath: /usr/src/app/logs/
+#       name: media
 
 persistence:
   config:
@@ -28,5 +28,5 @@ metrics:
 nodeSelector:
   node-role.kubernetes.io/worker: ""
 
-deploymentStrategy:
-  type: Recreate
+# deploymentStrategy:
+#   type: Recreate
