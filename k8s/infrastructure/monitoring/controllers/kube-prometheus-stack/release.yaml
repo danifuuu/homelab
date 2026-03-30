@@ -40,3 +40,8 @@ spec:
     grafana:
       defaultDashboardsEnabled: false
       adminPassword: flux
+      sidecar:
+        dashboards:
+          folderAnnotation: grafana_folder
+          provider:
+            foldersFromFilesStructure: true
