@@ -44,6 +44,13 @@ spec:
         podMonitorSelector:
           matchLabels:
             app.kubernetes.io/component: monitoring
+        # Select ALL ServiceMonitors across ALL namespaces.
+        # serviceMonitorSelectorNilUsesHelmValues must be false, otherwise the
+        # chart overrides the empty selector with Helm-label-based selectors and
+        # ServiceMonitors created by other charts (e.g. Jellyfin) are not scraped.
+        serviceMonitorSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
     grafana:
       defaultDashboardsEnabled: false
       adminPassword: flux

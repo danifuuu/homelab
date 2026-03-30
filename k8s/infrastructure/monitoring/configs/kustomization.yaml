@@ -25,3 +25,12 @@ configMapGenerator:
       labels:
         grafana_dashboard: "1"
         kustomize.toolkit.fluxcd.io/substitute: disabled
+  - name: jellyfin-grafana-dashboard
+    files:
+      - dashboards/jellyfin.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+        kustomize.toolkit.fluxcd.io/substitute: disabled
+      annotations:
+        grafana_folder: Jellyfin
