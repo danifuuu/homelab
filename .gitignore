@@ -11,3 +11,6 @@ controlplane.yaml
 *.terraform*
 
 *.secret.yaml
+
+# Go build artifacts
+.github/scripts/flux-diff/flux-diff

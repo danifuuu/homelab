@@ -1,0 +1,87 @@
+name: Flux Diff
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "k8s/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  flux-diff:
+    name: Preview Flux Changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: pr
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: pr/.github/scripts/flux-diff/go.mod
+
+      - name: Build flux-diff
+        run: go build -o /usr/local/bin/flux-diff ./
+        working-directory: pr/.github/scripts/flux-diff
+
+      - name: Detect changed HelmRelease directories
+        id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Use git diff within the PR checkout to find changed files
+          changed_dirs=$(git -C pr diff --name-only "$BASE_SHA" "$HEAD_SHA" -- 'k8s/' | \
+            sed 's|^k8s/||' | \
+            xargs -I{} dirname {} | \
+            sort -u)
+
+          # Filter to directories that contain a HelmRelease
+          release_dirs=""
+          for dir in $changed_dirs; do
+            search_path="pr/k8s/$dir"
+            if [ ! -d "$search_path" ]; then
+              search_path="base/k8s/$dir"
+            fi
+            if [ -d "$search_path" ]; then
+              if grep -rl 'kind: HelmRelease' "$search_path"/*.yaml 2>/dev/null | head -1 > /dev/null 2>&1; then
+                release_dirs="$release_dirs $dir"
+              fi
+            fi
+          done
+
+          release_dirs=$(echo "$release_dirs" | xargs)
+          echo "dirs=$release_dirs" >> "$GITHUB_OUTPUT"
+
+          if [ -z "$release_dirs" ]; then
+            echo "No HelmRelease directories changed"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changed HelmRelease directories: $release_dirs"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate Helm diffs
+        if: steps.detect.outputs.has_changes == 'true'
+        env:
+          CHANGED_DIRS: ${{ steps.detect.outputs.dirs }}
+        run: flux-diff
+
+      - name: Post PR comment
+        if: steps.detect.outputs.has_changes == 'true'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: flux-diff
+          path: /tmp/comment-body.md
