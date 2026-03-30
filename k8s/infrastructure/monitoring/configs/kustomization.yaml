@@ -18,6 +18,7 @@ configMapGenerator:
   - name: grafana-dashboards
     files:
       - dashboards/cluster-logs.json
+      - dashboards/nodes.json
     options:
       labels:
         grafana_dashboard: "1"
