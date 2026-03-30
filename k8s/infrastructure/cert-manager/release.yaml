@@ -5,9 +5,13 @@ metadata:
   namespace: cert-manager
 spec:
   interval: 1h
-  chartRef:
-    kind: OCIRepository
-    name: cert-manager
+  chart:
+    spec:
+      chart: cert-manager
+      version: v1.20.1
+      sourceRef:
+        kind: HelmRepository
+        name: cert-manager
   values:
     crds:
       enabled: true
