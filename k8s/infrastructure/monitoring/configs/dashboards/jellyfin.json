@@ -56,9 +56,10 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "Running": { "color": "green", "index": 0, "text": "Running" } }, "type": "value" },
-            { "options": { "Pending": { "color": "yellow", "index": 1, "text": "Pending" } }, "type": "value" },
-            { "options": { "Failed":  { "color": "red",    "index": 2, "text": "Failed"  } }, "type": "value" }
+            {
+              "options": { "1": { "color": "green", "index": 0, "text": "Running" } },
+              "type": "value"
+            }
           ],
           "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] }
         },
@@ -71,15 +72,15 @@
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^phase$/", "values": false },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto"
       },
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "kube_pod_status_phase{namespace=\"jellyfin\", phase=\"Running\"} == 1",
+          "expr": "kube_pod_status_phase{namespace=\"jellyfin\", phase=\"Running\", pod=~\"jellyfin-.*\"}",
           "instant": true,
-          "legendFormat": "Running",
+          "legendFormat": "Phase",
           "refId": "A"
         }
       ],
@@ -240,7 +241,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "time() - kube_pod_start_time{namespace=\"jellyfin\"}",
+          "expr": "time() - process_start_time_seconds{namespace=\"jellyfin\"}",
           "instant": true,
           "legendFormat": "Uptime",
           "refId": "A"
