@@ -129,7 +129,7 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-      "description": "Current root filesystem usage across selected nodes",
+      "description": "Highest filesystem usage across selected nodes (excludes tmpfs/overlay)",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -163,13 +163,13 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "(1 - node_filesystem_avail_bytes{node=~\"$node\", mountpoint=\"/\", fstype!=\"tmpfs\"} / node_filesystem_size_bytes{node=~\"$node\", mountpoint=\"/\", fstype!=\"tmpfs\"}) * 100",
+          "expr": "max by (node) ((1 - node_filesystem_avail_bytes{node=~\"$node\", fstype!~\"tmpfs|overlay|rootfs\"} / node_filesystem_size_bytes{node=~\"$node\", fstype!~\"tmpfs|overlay|rootfs\"}) * 100)",
           "instant": true,
           "legendFormat": "{{node}}",
           "refId": "A"
         }
       ],
-      "title": "Disk Usage (/)",
+      "title": "Disk Usage (max)",
       "type": "stat"
     },
     {
