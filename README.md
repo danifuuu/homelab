@@ -51,7 +51,7 @@ graph TD
             Prom["Prometheus (24h Retention)"]
             Graf["Grafana (Dashboards)"]
             Loki["Loki (7d Retention)"]
-            Tail["Promtail (Log Shipping)"]
+            Tail["Alloy (Log Shipping)"]
             
             Dash["<b>Dashboards:</b><br/>Cluster, Control Plane, Logs"]
             
@@ -113,7 +113,7 @@ graph TD
 | **Prometheus**  | Metrics collection (24-hour retention, drift detection enabled) |
 | **Grafana**  | Metrics visualization with custom dashboards |
 | **Loki**  | Centralized log aggregation (7-day retention, 168h TSDB) |
-| **Promtail**  | Log shipper collecting logs to Loki |
+| **Alloy**  | Log shipper collecting logs to Loki |
 | **Metrics Server**  | Kubernetes metrics aggregation |
 
 ---
@@ -267,7 +267,7 @@ To add storage capacity:
 ### Logging (Loki)
 - **Retention:** 7 days (168 hours)
 - **Storage Backend:** MinIO S3-compatible storage
-- **Log Shipper:** Promtail collects logs from all pods
+- **Log Shipper:** Alloy collects logs from all pods
 
 ### Grafana Dashboards
 - **Cluster Dashboard** - Node status, pod distribution, resource usage
