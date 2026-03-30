@@ -1647,6 +1647,203 @@
       ],
       "title": "Helm Charts ops/min",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Current Helm releases managed by Flux (equivalent to `flux get hr -A`)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Ready"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "True": {
+                        "color": "green",
+                        "index": 0,
+                        "text": "True"
+                      },
+                      "False": {
+                        "color": "red",
+                        "index": 1,
+                        "text": "False"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Suspended"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "true": {
+                        "color": "orange",
+                        "index": 0,
+                        "text": "true"
+                      },
+                      "false": {
+                        "color": "transparent",
+                        "index": 1,
+                        "text": "false"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 79
+      },
+      "id": 33,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Name"
+          }
+        ]
+      },
+      "pluginVersion": "10.0.3",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "gotk_resource_info{customresource_kind=\"HelmRelease\"}",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Helm Releases",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "chart_ref_name": true,
+              "chart_source_name": true,
+              "container": true,
+              "customresource_group": true,
+              "customresource_kind": true,
+              "customresource_version": true,
+              "endpoint": true,
+              "instance": true,
+              "job": true,
+              "namespace": true,
+              "pod": true,
+              "pod_template_hash": true,
+              "service": true
+            },
+            "indexByName": {
+              "exported_namespace": 0,
+              "name": 1,
+              "chart_name": 2,
+              "chart_app_version": 3,
+              "revision": 4,
+              "suspended": 5,
+              "ready": 6
+            },
+            "renameByName": {
+              "exported_namespace": "Namespace",
+              "name": "Name",
+              "chart_name": "Chart",
+              "chart_app_version": "App Version",
+              "revision": "Revision",
+              "suspended": "Suspended",
+              "ready": "Ready"
+            }
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "(Namespace|Name|Chart|App Version|Revision|Suspended|Ready)"
+            }
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": "10s",
@@ -1725,6 +1922,6 @@
   "timezone": "",
   "title": "Flux Control Plane",
   "uid": "flux-control-plane",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
