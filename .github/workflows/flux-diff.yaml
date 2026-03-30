@@ -28,7 +28,7 @@ jobs:
           path: base
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: pr/.github/scripts/flux-diff/go.mod
 
