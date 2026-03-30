@@ -62,6 +62,11 @@ spec:
             }
 
             rule {
+              source_labels = ["__meta_kubernetes_pod_label_app"]
+              target_label  = "app"
+            }
+
+            rule {
               target_label = "job"
               replacement  = "integrations/kubernetes/pod-logs"
             }
@@ -81,10 +86,19 @@ spec:
             sync_period  = "5s"
           }
 
-          // Tail matched log files and forward to Loki
+          // Tail matched log files and forward to processing
           loki.source.file "pods" {
             targets    = local.file_match.pods.targets
+            forward_to = [loki.process.pods.receiver]
+          }
+
+          // Parse the CRI log format used by containerd/Talos:
+          //   <timestamp> <stream> <flags> <log content>
+          // stage.cri extracts the stream label (stdout/stderr) and
+          // decodes the log line so downstream | json parsing works correctly.
+          loki.process "pods" {
             forward_to = [loki.write.loki.receiver]
+            stage.cri {}
           }
 
           // Send logs to Loki
