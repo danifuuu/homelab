@@ -24,9 +24,7 @@ spec:
                 - secretRef:
                     name: jellyfin-secret
               volumeMounts:
-              - mountPath: /usr/src/app/VODS
-                name: media
-              - mountPath: /usr/src/app/logs/
+              - mountPath: /data/VODS
                 name: media
           volumes:
             - name: media
