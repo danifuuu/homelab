@@ -19,7 +19,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: m3uparser
-              image: danifuu/m3uparser:latest
+              image: danifuu/m3uparser:go-latest
               envFrom:
                 - secretRef:
                     name: jellyfin-secret
