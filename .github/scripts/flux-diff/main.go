@@ -55,8 +55,7 @@ type HelmRepository struct {
 	Kind     string   `yaml:"kind"`
 	Metadata Metadata `yaml:"metadata"`
 	Spec     struct {
-		Type string `yaml:"type"` // "oci" or "" (default = HTTP)
-		URL  string `yaml:"url"`
+		URL string `yaml:"url"`
 	} `yaml:"spec"`
 }
 
@@ -213,16 +212,6 @@ func resolveChart(hr *HelmRelease, dir string) (chartInfo, error) {
 	if err := yaml.Unmarshal(data, &repo); err != nil {
 		return chartInfo{}, err
 	}
-
-	// OCI-typed HelmRepository: chart reference is <oci-url>/<chart-name>.
-	if repo.Spec.Type == "oci" {
-		return chartInfo{
-			Type:    "oci",
-			Name:    strings.TrimSuffix(repo.Spec.URL, "/") + "/" + cs.Chart,
-			Version: cs.Version,
-		}, nil
-	}
-
 	return chartInfo{
 		Type:    "helm-repo",
 		Name:    cs.Chart,
@@ -320,63 +309,32 @@ func writeValuesFile(values map[string]any) (string, error) {
 // ---------------------------------------------------------------------------
 
 // helmTemplate renders a chart and returns the rendered manifest bytes.
-//
-// It pulls the chart to a local temp directory, extracts it, removes
-// templates/NOTES.txt (which is never deployed but can contain broken Go
-// template code that makes "helm template" fail), and then templates the
-// local copy.
 func helmTemplate(hr *HelmRelease, ci chartInfo, valuesPath string) ([]byte, error) {
 	ns := hr.Metadata.Namespace
 	if ns == "" {
 		ns = "default"
 	}
 
-	// ── Pull the chart to a temp dir ────────────────────────────────
-	tmpDir, err := os.MkdirTemp("", "chart-*")
-	if err != nil {
-		return nil, fmt.Errorf("creating temp dir: %w", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	pullArgs := []string{"pull", "--destination", tmpDir, "--untar"}
+	args := []string{"template", hr.Metadata.Name}
 
 	switch ci.Type {
 	case "oci":
-		pullArgs = append(pullArgs, ci.Name)
+		args = append(args, ci.Name)
 		if ci.Version != "" {
-			pullArgs = append(pullArgs, "--version", ci.Version)
+			args = append(args, "--version", ci.Version)
 		}
 	case "helm-repo":
 		alias := fmt.Sprintf("repo-%x", md5.Sum([]byte(ci.RepoURL)))[:14]
+		// Add and update repo.
 		run("helm", "repo", "add", alias, ci.RepoURL, "--force-update")
 		run("helm", "repo", "update", alias)
-		pullArgs = append(pullArgs, alias+"/"+ci.Name)
+		args = append(args, alias+"/"+ci.Name)
 		if ci.Version != "" {
-			pullArgs = append(pullArgs, "--version", ci.Version)
+			args = append(args, "--version", ci.Version)
 		}
 	}
 
-	pullCmd := exec.Command("helm", pullArgs...)
-	var pullStderr bytes.Buffer
-	pullCmd.Stderr = &pullStderr
-	if err := pullCmd.Run(); err != nil {
-		return nil, fmt.Errorf("helm pull failed: %s\n%s", err, pullStderr.String())
-	}
-
-	// ── Find the extracted chart directory ───────────────────────────
-	entries, err := os.ReadDir(tmpDir)
-	if err != nil || len(entries) == 0 {
-		return nil, fmt.Errorf("no chart extracted in %s", tmpDir)
-	}
-	chartDir := filepath.Join(tmpDir, entries[0].Name())
-
-	// ── Remove NOTES.txt (never deployed, can break templating) ─────
-	notesPath := filepath.Join(chartDir, "templates", "NOTES.txt")
-	_ = os.Remove(notesPath) // ignore error if it doesn't exist
-
-	// ── Template the local chart ────────────────────────────────────
-	args := []string{"template", hr.Metadata.Name, chartDir,
-		"--namespace", ns, "--values", valuesPath}
+	args = append(args, "--namespace", ns, "--values", valuesPath)
 
 	cmd := exec.Command("helm", args...)
 	var stdout, stderr bytes.Buffer
