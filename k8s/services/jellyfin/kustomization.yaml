@@ -5,6 +5,7 @@ resources:
   - ./namespace.yaml
   - ./repository.yaml
   - ./release.yaml
+  - ./httpRoute.yaml
   - ./cronjob.yaml
 
 configMapGenerator:
