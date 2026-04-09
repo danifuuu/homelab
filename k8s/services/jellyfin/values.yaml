@@ -32,3 +32,19 @@ nodeSelector:
 
 # deploymentStrategy:
 #   type: Recreate
+
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: homelab-gateway
+      namespace: jellyfin
+  hostnames:
+    - "jellyfin.homelab.home.arpa"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: jellyfin
+          port: 8096
