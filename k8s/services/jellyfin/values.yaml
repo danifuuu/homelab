@@ -37,7 +37,7 @@ httpRoute:
   enabled: true
   parentRefs:
     - name: homelab-gateway
-      namespace: jellyfin
+      namespace: default
   hostnames:
     - "jellyfin.homelab.home.arpa"
   rules:
