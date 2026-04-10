@@ -48,3 +48,17 @@ httpRoute:
       backendRefs:
         - name: jellyfin
           port: 8096
+
+
+startupProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 20
+  failureThreshold: 60
+
+livenessProbe:
+  initialDelaySeconds: 30
+  timeoutSeconds: 5
+
+readinessProbe:
+  initialDelaySeconds: 30
+  timeoutSeconds: 5
