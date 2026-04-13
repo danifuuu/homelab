@@ -51,11 +51,14 @@ type HelmRelease struct {
 }
 
 // HelmRepository represents a Flux HelmRepository resource.
+// Flux supports both HTTP and OCI-typed HelmRepositories; the Type field
+// distinguishes them ("oci" vs. "" which means plain HTTP).
 type HelmRepository struct {
 	Kind     string   `yaml:"kind"`
 	Metadata Metadata `yaml:"metadata"`
 	Spec     struct {
-		URL string `yaml:"url"`
+		Type string `yaml:"type"` // "oci" or "" (default = HTTP)
+		URL  string `yaml:"url"`
 	} `yaml:"spec"`
 }
 
@@ -212,6 +215,16 @@ func resolveChart(hr *HelmRelease, dir string) (chartInfo, error) {
 	if err := yaml.Unmarshal(data, &repo); err != nil {
 		return chartInfo{}, err
 	}
+
+	// OCI-typed HelmRepository: chart reference is <oci-url>/<chart-name>.
+	if repo.Spec.Type == "oci" {
+		return chartInfo{
+			Type:    "oci",
+			Name:    strings.TrimSuffix(repo.Spec.URL, "/") + "/" + cs.Chart,
+			Version: cs.Version,
+		}, nil
+	}
+
 	return chartInfo{
 		Type:    "helm-repo",
 		Name:    cs.Chart,
