@@ -23,6 +23,21 @@ spec:
               envFrom:
                 - secretRef:
                     name: jellyfin-secret
+              env:
+                # Telegram bot webhook — set TELEGRAM_WEBHOOK_URL and
+                # TELEGRAM_WEBHOOK_SECRET in jellyfin-secret to enable notifications.
+                - name: TELEGRAM_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: jellyfin-secret
+                      key: TELEGRAM_WEBHOOK_URL
+                      optional: true
+                - name: TELEGRAM_WEBHOOK_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: jellyfin-secret
+                      key: TELEGRAM_WEBHOOK_SECRET
+                      optional: true
               volumeMounts:
               - mountPath: /data/VODS
                 name: media
