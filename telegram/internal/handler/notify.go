@@ -77,7 +77,7 @@ func (h *NotifyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // buildMessage formats the Notification into a MarkdownV2 Telegram message.
 func buildMessage(n Notification) string {
-	now := time.Now().Format("02 Jan 2006 15:04")
+	now := time.Now().UTC().Format("02 Jan 2006 15:04 UTC")
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("*m3uparser run* — %s\n\n", escape(now)))
