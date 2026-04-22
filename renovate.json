@@ -8,5 +8,13 @@
   },
   "kubernetes": {
     "managerFilePatterns": ["/k8s/.+\\.ya?ml$/"]
-  }
+  },
+  "packageRules": [
+    {
+      "description": "Ignore docker image updates in flux-managed gotk-components manifest — flux manager handles these holistically",
+      "matchManagers": ["docker-compose", "dockerfile", "kubernetes"],
+      "matchFileNames": ["k8s/flux-system/gotk-components.yaml"],
+      "enabled": false
+    }
+  ]
 }
