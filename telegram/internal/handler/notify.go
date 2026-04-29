@@ -19,6 +19,12 @@ type MediaItem struct {
 	Type  string `json:"type"`  // "movie" | "tv" | "unsorted"
 }
 
+// DownloadError describes a single failed M3U download.
+type DownloadError struct {
+	URL   string `json:"url"`
+	Error string `json:"error"`
+}
+
 // Notification is the payload POSTed by the m3uparser cronjob.
 type Notification struct {
 	// Added and Removed hold the explicit list of media items.
@@ -27,6 +33,9 @@ type Notification struct {
 
 	// Stats
 	Errors int `json:"errors"`
+
+	// DownloadErrors holds per-URL download failures.
+	DownloadErrors []DownloadError `json:"download_errors,omitempty"`
 }
 
 // NotifyHandler handles POST /notify requests.
@@ -100,6 +109,14 @@ func buildMessage(n Notification) string {
 
 	if len(n.Added) == 0 && len(n.Removed) == 0 {
 		sb.WriteString("_No media changes this run\\._\n\n")
+	}
+
+	if len(n.DownloadErrors) > 0 {
+		sb.WriteString("*Download errors:*\n")
+		for _, de := range n.DownloadErrors {
+			sb.WriteString(fmt.Sprintf("  ⚠️ `%s`\n  _%s_\n", escape(de.URL), escape(de.Error)))
+		}
+		sb.WriteString("\n")
 	}
 
 	// Stats footer
