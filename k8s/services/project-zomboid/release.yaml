@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: project-zomboid
+  namespace: project-zomboid
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: zomboid-dedicated-server
+      version: "0.1.0"
+      sourceRef:
+        kind: HelmRepository
+        name: jsknnr
+        namespace: project-zomboid
+  valuesFrom:
+    - kind: ConfigMap
+      name: project-zomboid-values
+      valuesKey: values.yaml
