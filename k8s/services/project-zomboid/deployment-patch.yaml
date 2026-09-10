@@ -7,3 +7,8 @@ spec:
     spec:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+      containers:
+      - name: zomboid-dedicated-server
+        envFrom:
+        - secretRef:
+            name: project-zomboid-config

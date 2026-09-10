@@ -5,6 +5,7 @@ resources:
   - ./namespace.yaml
   - ./repository.yaml
   - ./release.yaml
+  - ./secret.yaml
 
 patchesStrategicMerge:
   - deployment-patch.yaml

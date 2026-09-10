@@ -19,29 +19,3 @@ volumes:
   dataPVC:
     size: 50Gi
   storageClassName: "longhorn"
-
-config:
-  antiCheatType21: "true"
-  adminPassword: "AdminPleaseChangeMe"
-  adminUsername: "admin"
-  autosaveInterval: 15
-  backupsCount: 5
-  backupsPeriod: 120
-  directPort: "16262"
-  gamePort: "16261"
-  mapNames: "Muldraugh, KY"
-  maxMemory: "10g"
-  maxPlayers: "16"
-  modIDs: ""
-  modNames: ""
-  pauseEmpty: "true"
-  pingLimit: 400
-  pvp: "true"
-  public: "true"
-  rconPassword: "RCONPleaseChangeMe"
-  rconPort: "27015"
-  serverIP: ""
-  serverName: "Zomboid Containerized"
-  serverPassword: ""
-  steamVAC: "true"
-  betaBranch: ""
