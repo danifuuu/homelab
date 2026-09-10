@@ -16,4 +16,4 @@ resources:
   # Services
   # - services/jellyfin  # Temporarily disabled
   - services/telegram-bot
-  - services/project-zomboid
+  # - services/project-zomboid
