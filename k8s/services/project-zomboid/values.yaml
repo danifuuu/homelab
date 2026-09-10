@@ -45,6 +45,3 @@ config:
   serverPassword: ""
   steamVAC: "true"
   betaBranch: ""
-
-nodeSelector:
-  node-role.kubernetes.io/worker: ""

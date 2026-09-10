@@ -6,6 +6,9 @@ resources:
   - ./repository.yaml
   - ./release.yaml
 
+patchesStrategicMerge:
+  - deployment-patch.yaml
+
 configMapGenerator:
   - name: project-zomboid-values
     files:
