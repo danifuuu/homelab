@@ -1,7 +1,7 @@
 image:
   repository: sknnr/zomboid-dedicated-server
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 service:
   type: LoadBalancer
@@ -10,8 +10,8 @@ service:
 
 resources:
   requests:
-    memory: 12G
-    cpu: 6.0
+    memory: 3G
+    cpu: 500m
 
 volumes:
   serverPVC:
