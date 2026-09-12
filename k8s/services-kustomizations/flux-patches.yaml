@@ -1,0 +1,17 @@
+---
+# Project Zomboid Patches
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: zomboid-patches
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/services/project-zomboid/flux-patches
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  # This kustomization depends on the main Helm release being applied first
+  dependsOn:
+    - name: zomboid-operators
