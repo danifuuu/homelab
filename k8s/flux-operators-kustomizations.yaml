@@ -1,0 +1,154 @@
+---
+# Flux Kustomizations for Operators/Charts/CRDs
+# These are applied first and establish the foundation for custom resources
+# See flux-resources-kustomizations.yaml for the second stage
+
+---
+# Cert-Manager Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cert-manager-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/cert-manager
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# External DNS Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-dns-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/external-dns
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# Intel Device Plugin Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: intel-device-plugin-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/intel-device-plugin
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# MetalLB Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: metallb-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/metallb/operators
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# Metrics Server Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: metrics-server-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/metrics-server
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# Monitoring Stack Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: monitoring-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/monitoring
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# Node Feature Discovering Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: node-feature-discovering-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/node-feature-discovering
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# Longhorn Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: longhorn-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/longhorn/operators
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# Envoy Gateway Operators
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/envoy-gateway/operators
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+# Telegram Bot Service
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: telegram-bot
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/services/telegram-bot
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

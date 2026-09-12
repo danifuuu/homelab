@@ -1,14 +1,19 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# Two-stage deployment pattern for operators and resources:
+# - flux-operators-kustomizations.yaml: HelmRelease, charts, CRDs
+# - flux-resources-kustomizations.yaml: Custom resources that depend on operators
+# This ensures operators are ready before custom resources are applied.
+
 resources:
   # Infrastructure
   - infrastructure/cert-manager
-  - infrastructure/envoy-gateway
+  # - infrastructure/envoy-gateway  # Managed by flux-operators/resources-kustomizations.yaml
   - infrastructure/external-dns
   - infrastructure/intel-device-plugin
-  - infrastructure/longhorn
-  - infrastructure/metallb
+  # - infrastructure/longhorn  # Managed by flux-operators/resources-kustomizations.yaml
+  # - infrastructure/metallb  # Managed by flux-operators/resources-kustomizations.yaml
   - infrastructure/metrics-server
   - infrastructure/monitoring
   - infrastructure/node-feature-discovering
