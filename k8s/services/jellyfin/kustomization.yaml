@@ -11,3 +11,6 @@ configMapGenerator:
   - name: jellyfin-values
     files:
       - values.yaml
+
+configurations:
+  - kustomizeconfig.yaml
