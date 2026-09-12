@@ -9,3 +9,12 @@ configMapGenerator:
   - name: external-dns-values
     files:
       - values.yaml
+replacements:
+  - source:
+      kind: ConfigMap
+      name: external-dns-values
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.valuesFrom.0.name
