@@ -1,10 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
-  namespace: meltalb-system
+  namespace: metallb-system
+
+# Two-stage deployment (managed by Flux):
+# Stage 1: metallb-operators (namespace, repository, release)
+# Stage 2: metallb-resources (ip-address-pool, l2-advertisement)
+
 resources:
+  # Stage 1: Operators
   - ./namespace.yaml
   - ./repository.yaml
   - ./release.yaml
+  # Stage 2: Custom Resources
   - ./ip-address-pool.yaml
   - ./l2-advertisement.yaml

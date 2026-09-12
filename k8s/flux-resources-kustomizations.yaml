@@ -1,0 +1,55 @@
+---
+# Flux Kustomizations for Custom Resources
+# These are applied after their corresponding operators are ready
+# Depends on: flux-operators-kustomizations.yaml
+
+---
+# MetalLB Resources (IP pools, advertisements)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: metallb-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/metallb/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: metallb-operators
+
+---
+# Longhorn Resources (routes, storage configs)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: longhorn-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/longhorn/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: longhorn-operators
+
+---
+# Envoy Gateway Resources (gateway classes, gateway definitions)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/infrastructure/envoy-gateway/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: envoy-gateway-operators
