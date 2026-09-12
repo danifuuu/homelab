@@ -1,13 +1,26 @@
 ---
-# Cert-Manager Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: zomboid-operators
+  name: jellyfin-operators
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./k8s/services/project-zomboid
+  path: ./k8s/services/jellyfin
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: telegram-bot-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./k8s/services/telegram-bot
   prune: true
   sourceRef:
     kind: GitRepository
