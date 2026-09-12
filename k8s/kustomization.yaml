@@ -21,7 +21,7 @@ resources:
   # # Services
   # - services/jellyfin  # Temporarily disabled
   # - services/telegram-bot
-  # - services/project-zomboid
+  - services/project-zomboid
 
   # Kustomizations for Operators (applied first)
   - flux-operators-kustomizations.yaml
