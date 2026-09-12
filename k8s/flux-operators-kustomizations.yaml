@@ -138,17 +138,17 @@ spec:
     kind: GitRepository
     name: flux-system
 
----
-# Telegram Bot Service
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: telegram-bot
-  namespace: flux-system
-spec:
-  interval: 10m0s
-  path: ./k8s/services/telegram-bot
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
+# ---
+# # Telegram Bot Service
+# apiVersion: kustomize.toolkit.fluxcd.io/v1
+# kind: Kustomization
+# metadata:
+#   name: telegram-bot
+#   namespace: flux-system
+# spec:
+#   interval: 10m0s
+#   path: ./k8s/services/telegram-bot
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-system
