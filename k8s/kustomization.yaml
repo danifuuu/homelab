@@ -22,7 +22,7 @@ resources:
   # - services/jellyfin  # Temporarily disabled
   # - services/telegram-bot
   - services-kustomizations/flux-operators.yaml
-  - services-kustomizations/flux-patches.yaml
+  # - services-kustomizations/flux-patches.yaml
 
   # Kustomizations for Operators (applied first)
   - infra-kustomizations/flux-operators-kustomizations.yaml

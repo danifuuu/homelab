@@ -1,7 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-namespace: project-zomboid
-
-# These patches apply customizations to resources after they're created by Helm
-patchesStrategicMerge:
-  - deployment-patch.yaml

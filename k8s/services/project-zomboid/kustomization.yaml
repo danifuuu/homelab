@@ -10,3 +10,5 @@ configMapGenerator:
   - name: project-zomboid-values
     files:
       - values.yaml
+configurations:
+  - kustomizeconfig.yaml

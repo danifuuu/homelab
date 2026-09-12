@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: zomboid-dedicated-server
-      version: "0.1.0"
+      version: "1.0.0"
       sourceRef:
         kind: HelmRepository
         name: jsknnr
@@ -17,3 +17,26 @@ spec:
     - kind: ConfigMap
       name: project-zomboid-values
       valuesKey: values.yaml
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: zomboid-dedicated-server
+            patch: |-
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: zomboid-dedicated-server
+              spec:
+                template:
+                  spec:
+                    nodeSelector:
+                      node-role.kubernetes.io/worker: ""
+                    containers:
+                    - name: zomboid-dedicated-server
+                      envFrom:
+                      - secretRef:
+                          name: project-zomboid-config
