@@ -7,18 +7,23 @@ kind: Kustomization
 # This ensures operators are ready before custom resources are applied.
 
 resources:
-  # Infrastructure
-  - infrastructure/cert-manager
+  # # Infrastructure
+  # - infrastructure/cert-manager
   # - infrastructure/envoy-gateway  # Managed by flux-operators/resources-kustomizations.yaml
-  - infrastructure/external-dns
-  - infrastructure/intel-device-plugin
+  # - infrastructure/external-dns
+  # - infrastructure/intel-device-plugin
   # - infrastructure/longhorn  # Managed by flux-operators/resources-kustomizations.yaml
   # - infrastructure/metallb  # Managed by flux-operators/resources-kustomizations.yaml
-  - infrastructure/metrics-server
-  - infrastructure/monitoring
-  - infrastructure/node-feature-discovering
+  # - infrastructure/metrics-server
+  # - infrastructure/monitoring
+  # - infrastructure/node-feature-discovering
 
-  # Services
+  # # Services
   # - services/jellyfin  # Temporarily disabled
   # - services/telegram-bot
   # - services/project-zomboid
+
+  # Kustomizations for Operators (applied first)
+  - flux-operators-kustomizations.yaml
+  # Kustomizations for Custom Resources (applied after operators are ready)
+  - flux-resources-kustomizations.yaml
