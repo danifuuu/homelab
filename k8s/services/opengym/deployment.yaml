@@ -56,13 +56,19 @@ spec:
             - name: DATA_DIR
               value: /data
             # Passkeys are bound to this exact hostname and browsers only allow them over
-            # HTTPS; the gateway terminates TLS with the homelab-ca wildcard certificate.
-            # PASSWORD_LOGIN keeps the app usable from devices that do not trust that CA yet.
+            # HTTPS. The public Tailscale Funnel URL is the canonical origin: it is fronted
+            # by a browser-trusted Let's Encrypt certificate for opengym.tailcac74e.ts.net.
+            # PASSWORD_LOGIN stays on as a fallback for devices that cannot use a passkey.
             - name: RP_ID
-              value: opengym.homelab.home.arpa
+              value: opengym.tailcac74e.ts.net
             - name: ORIGIN
-              value: https://opengym.homelab.home.arpa
+              value: https://opengym.tailcac74e.ts.net
             - name: PASSWORD_LOGIN
+              value: "1"
+            # The Funnel URL is reachable from the public internet, so require an
+            # invite code before a new profile can be created. Existing accounts
+            # keep working.
+            - name: INVITE_ONLY
               value: "1"
           ports:
             - containerPort: 3000

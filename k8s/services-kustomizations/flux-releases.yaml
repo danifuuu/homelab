@@ -49,3 +49,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+  # The Tailscale Ingress needs the `tailscale` IngressClass, and the operator
+  # must be up before the Funnel proxy can be created.
+  dependsOn:
+    - name: tailscale-operators
