@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tailscale-operator
+  namespace: tailscale
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: tailscale-operator
+      version: 1.102.4
+      sourceRef:
+        kind: HelmRepository
+        name: tailscale
+  # The operator's OAuth client credentials are intentionally NOT set here. When
+  # the oauth block is empty the chart mounts a pre-existing Secret named
+  # "operator-oauth" (keys client_id/client_secret), which is synced from
+  # Bitwarden by the tailscale-oauth ExternalSecret. This keeps the credential
+  # out of Git.
+  values:
+    # The tags the operator and its proxy nodes join the tailnet with. Both must
+    # be declared in the tailnet policy file: tag:k8s-operator owns tag:k8s, and
+    # tag:k8s needs the `funnel` node attribute (see the Tailscale console steps).
+    operatorConfig:
+      defaultTags:
+        - tag:k8s-operator
+    proxyConfig:
+      defaultTags: tag:k8s
