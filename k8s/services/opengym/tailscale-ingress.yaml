@@ -1,7 +1,7 @@
 ---
 # Exposes the openGym web Service to the public internet through Tailscale
 # Funnel. The operator creates a proxy node (tag:k8s), provisions a Let's
-# Encrypt certificate for opengym.<tailnet>.ts.net, and serves it through the
+# Encrypt certificate for opengym.tailcac74e.ts.net, and serves it through the
 # Funnel relay servers. `tls.hosts` sets the desired MagicDNS short name; the
 # operator appends the tailnet domain.
 apiVersion: networking.k8s.io/v1

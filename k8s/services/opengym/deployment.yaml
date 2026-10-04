@@ -57,13 +57,12 @@ spec:
               value: /data
             # Passkeys are bound to this exact hostname and browsers only allow them over
             # HTTPS. The public Tailscale Funnel URL is the canonical origin: it is fronted
-            # by a browser-trusted Let's Encrypt certificate for opengym.<tailnet>.ts.net.
-            # Replace <tailnet> with the tailnet DNS name from the Tailscale admin console.
+            # by a browser-trusted Let's Encrypt certificate for opengym.tailcac74e.ts.net.
             # PASSWORD_LOGIN stays on as a fallback for devices that cannot use a passkey.
             - name: RP_ID
-              value: opengym.<tailnet>.ts.net
+              value: opengym.tailcac74e.ts.net
             - name: ORIGIN
-              value: https://opengym.<tailnet>.ts.net
+              value: https://opengym.tailcac74e.ts.net
             - name: PASSWORD_LOGIN
               value: "1"
             # The Funnel URL is reachable from the public internet, so require an
