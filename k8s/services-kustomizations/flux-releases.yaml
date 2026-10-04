@@ -31,3 +31,21 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: opengym-operators
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  # The media initContainer downloads ~140 MB on first start.
+  timeout: 10m0s
+  wait: true
+  path: ./k8s/services/opengym
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
