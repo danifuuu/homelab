@@ -1,0 +1,26 @@
+---
+# Users, passkeys, per-user state, uploads and the session secret. BACK THIS ONE UP.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opengym-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi
+---
+# Exercise images and GIFs (~140 MB), downloaded again by the media initContainer if lost.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opengym-media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi
