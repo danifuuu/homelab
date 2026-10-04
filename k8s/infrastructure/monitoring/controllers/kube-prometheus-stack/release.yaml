@@ -35,6 +35,8 @@ spec:
       enabled: false
     prometheus:
       prometheusSpec:
+        nodeSelector:
+          node-role.kubernetes.io/worker: ""
         retention: 24h
         resources:
           requests:
@@ -51,7 +53,15 @@ spec:
         serviceMonitorSelectorNilUsesHelmValues: false
         serviceMonitorSelector: {}
         serviceMonitorNamespaceSelector: {}
+    prometheusOperator:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+    kube-state-metrics:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
     grafana:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       defaultDashboardsEnabled: false
       adminPassword: flux
       sidecar:
