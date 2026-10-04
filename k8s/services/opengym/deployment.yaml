@@ -65,12 +65,14 @@ spec:
               value: https://opengym.tailcac74e.ts.net
             - name: PASSWORD_LOGIN
               value: "1"
-            # Bootstrap: no profile exists yet and there is no admin to mint invite
-            # codes, so invite-only must stay off until the owner's profile exists.
-            # Then set ADMIN_UIDS=<account id> and flip this back to "1"; the admin
-            # dashboard is what generates invite codes.
+            # Admin accounts get the dashboard that mints invite codes. The owner's
+            # account id lives in data/db.json (users[].id) / Settings -> Account.
+            - name: ADMIN_UIDS
+              value: NJ4t0EbPfVhRsWxE
+            # New profiles now require an invite code from the admin dashboard.
+            # Existing accounts (including this admin) keep working.
             - name: INVITE_ONLY
-              value: "0"
+              value: "1"
           ports:
             - containerPort: 3000
               name: http
