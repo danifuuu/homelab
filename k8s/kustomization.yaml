@@ -1,30 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Two-stage deployment pattern for operators and resources:
-# - flux-operators-kustomizations.yaml: HelmRelease, charts, CRDs
-# - flux-resources-kustomizations.yaml: Custom resources that depend on operators
-# This ensures operators are ready before custom resources are applied.
-
+# The flux-system Kustomization reconciles this root. The files below contain
+# Flux Kustomization CRs, one per component, split into two stages:
+# - flux-releases.yaml: namespaces, HelmRepositories, HelmReleases
+# - flux-resources.yaml: CRs that dependOn the release stage
 resources:
-  # # Infrastructure
-  # - infrastructure/cert-manager
-  # - infrastructure/envoy-gateway  # Managed by flux-operators/resources-kustomizations.yaml
-  # - infrastructure/external-dns
-  # - infrastructure/intel-device-plugin
-  # - infrastructure/longhorn  # Managed by flux-operators/resources-kustomizations.yaml
-  # - infrastructure/metallb  # Managed by flux-operators/resources-kustomizations.yaml
-  # - infrastructure/metrics-server
-  # - infrastructure/monitoring
-  # - infrastructure/node-feature-discovering
-
-  # # Services
-  # - services/jellyfin  # Temporarily disabled
-  # - services/telegram-bot
-  - services-kustomizations/flux-operators.yaml
-  # - services-kustomizations/flux-patches.yaml
-
-  # Kustomizations for Operators (applied first)
-  - infra-kustomizations/flux-operators-kustomizations.yaml
-  # Kustomizations for Custom Resources (applied after operators are ready)
-  - infra-kustomizations/flux-resources-kustomizations.yaml
+  - infra-kustomizations/flux-releases.yaml
+  - infra-kustomizations/flux-resources.yaml
+  - services-kustomizations/flux-releases.yaml

@@ -1,10 +1,14 @@
 ---
-# Flux Kustomizations for Operators/Charts/CRDs
-# These are applied first and establish the foundation for custom resources
-# See flux-resources-kustomizations.yaml for the second stage
+# Stage 1: namespaces, HelmRepositories and HelmReleases for every component.
+# `wait: true` makes each Kustomization Ready only once its HelmReleases are
+# reconciled, so the stage-2 `dependsOn` in flux-resources.yaml actually gates
+# on operator/CRD readiness instead of just on the manifests being applied.
+#
+# NOTE: the `-operators` suffix is legacy naming (not every component is an
+# operator). Names are kept stable on purpose: renaming a Flux Kustomization
+# prunes its inventory, which would uninstall the underlying Helm releases.
 
 ---
-# Cert-Manager Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -12,6 +16,9 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
   path: ./k8s/infrastructure/cert-manager
   prune: true
   sourceRef:
@@ -19,7 +26,6 @@ spec:
     name: flux-system
 
 ---
-# External DNS Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -27,14 +33,36 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
   path: ./k8s/infrastructure/external-dns
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  # external-dns watches Gateway API resources, so the CRDs must exist first.
+  dependsOn:
+    - name: envoy-gateway-operators
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
+  path: ./k8s/infrastructure/external-secrets
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
 
 ---
-# Intel Device Plugin Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -42,6 +70,9 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
   path: ./k8s/infrastructure/intel-device-plugin
   prune: true
   sourceRef:
@@ -49,7 +80,6 @@ spec:
     name: flux-system
 
 ---
-# MetalLB Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -57,14 +87,16 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./k8s/infrastructure/metallb/operators
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
+  path: ./k8s/infrastructure/metallb
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
 
 ---
-# Metrics Server Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -72,6 +104,9 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
   path: ./k8s/infrastructure/metrics-server
   prune: true
   sourceRef:
@@ -79,7 +114,6 @@ spec:
     name: flux-system
 
 ---
-# Monitoring Stack Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -87,14 +121,19 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 15m0s
+  wait: true
   path: ./k8s/infrastructure/monitoring
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
+  # monitoring ships HTTPRoutes, which need the Gateway API CRDs.
+  dependsOn:
+    - name: envoy-gateway-operators
 
 ---
-# Node Feature Discovering Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -102,14 +141,16 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./k8s/infrastructure/node-feature-discovering
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
+  path: ./k8s/infrastructure/node-feature-discovery
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
 
 ---
-# Longhorn Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -117,14 +158,16 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./k8s/infrastructure/longhorn/operators
+  retryInterval: 1m0s
+  timeout: 10m0s
+  wait: true
+  path: ./k8s/infrastructure/longhorn
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
 
 ---
-# Envoy Gateway Operators
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -132,23 +175,11 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./k8s/infrastructure/envoy-gateway/operators
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
+  path: ./k8s/infrastructure/envoy-gateway
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-
-# ---
-# # Telegram Bot Service
-# apiVersion: kustomize.toolkit.fluxcd.io/v1
-# kind: Kustomization
-# metadata:
-#   name: telegram-bot
-#   namespace: flux-system
-# spec:
-#   interval: 10m0s
-#   path: ./k8s/services/telegram-bot
-#   prune: true
-#   sourceRef:
-#     kind: GitRepository
-#     name: flux-system
