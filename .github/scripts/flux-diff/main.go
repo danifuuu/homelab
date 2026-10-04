@@ -429,6 +429,19 @@ func displayName(dir string) string {
 	return d
 }
 
+// truncateDiff caps a unified diff at limit bytes, cutting on a line boundary.
+func truncateDiff(diff string, limit int) string {
+	if len(diff) <= limit {
+		return diff
+	}
+	cut := diff[:limit]
+	if idx := strings.LastIndexByte(cut, '\n'); idx > 0 {
+		cut = cut[:idx]
+	}
+	omitted := strings.Count(diff[len(cut):], "\n")
+	return cut + fmt.Sprintf("\n… (%d more line(s) truncated)", omitted)
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -630,27 +643,48 @@ func main() {
 
 	buf.WriteString("\n")
 
+	// Cap the diff sections so the PR comment stays within GitHub's 65536
+	// character body limit. CRD-heavy charts (e.g. operators) can otherwise
+	// render tens of thousands of lines in a single diff.
+	const (
+		maxDiffBytes  = 12000
+		maxTotalBytes = 60000
+	)
+
+	var details bytes.Buffer
+	truncated := 0
 	for _, r := range results {
 		name := r.DisplayName + "/" + r.ReleaseName
+		var section bytes.Buffer
 		switch {
 		case r.Deleted:
-			fmt.Fprintf(&buf, "<details>\n<summary>:wastebasket: <b>%s</b> — deleted</summary>\n\n", name)
-			buf.WriteString("> This HelmRelease has been removed in this PR.\n\n</details>\n\n")
+			fmt.Fprintf(&section, "<details>\n<summary>:wastebasket: <b>%s</b> — deleted</summary>\n\n", name)
+			section.WriteString("> This HelmRelease has been removed in this PR.\n\n</details>\n\n")
 
 		case r.Failed:
-			fmt.Fprintf(&buf, "<details>\n<summary>:warning: <b>%s</b> — %s (template failed: %s)</summary>\n\n", name, r.ChangeDesc, r.FailedSide)
-			buf.WriteString("> Helm template failed. This can happen with charts that require CRDs or\n")
-			buf.WriteString("> dependencies not available in a standalone template context.\n\n</details>\n\n")
+			fmt.Fprintf(&section, "<details>\n<summary>:warning: <b>%s</b> — %s (template failed: %s)</summary>\n\n", name, r.ChangeDesc, r.FailedSide)
+			section.WriteString("> Helm template failed. This can happen with charts that require CRDs or\n")
+			section.WriteString("> dependencies not available in a standalone template context.\n\n</details>\n\n")
 
 		case r.Diff != "":
-			fmt.Fprintf(&buf, "<details>\n<summary>:memo: <b>%s</b> — %s (+%d/-%d)</summary>\n\n", name, r.ChangeDesc, r.Additions, r.Deletions)
-			fmt.Fprintf(&buf, "```diff\n%s\n```\n\n</details>\n\n", r.Diff)
+			fmt.Fprintf(&section, "<details>\n<summary>:memo: <b>%s</b> — %s (+%d/-%d)</summary>\n\n", name, r.ChangeDesc, r.Additions, r.Deletions)
+			fmt.Fprintf(&section, "```diff\n%s\n```\n\n</details>\n\n", truncateDiff(r.Diff, maxDiffBytes))
 
 		default:
-			fmt.Fprintf(&buf, "<details>\n<summary>:white_check_mark: <b>%s</b> — %s (no manifest diff)</summary>\n\n", name, r.ChangeDesc)
-			buf.WriteString("> The rendered manifests are identical. The change may only affect Flux\n")
-			buf.WriteString("> metadata (intervals, dependencies, etc.) that don't alter deployed resources.\n\n</details>\n\n")
+			fmt.Fprintf(&section, "<details>\n<summary>:white_check_mark: <b>%s</b> — %s (no manifest diff)</summary>\n\n", name, r.ChangeDesc)
+			section.WriteString("> The rendered manifests are identical. The change may only affect Flux\n")
+			section.WriteString("> metadata (intervals, dependencies, etc.) that don't alter deployed resources.\n\n</details>\n\n")
 		}
+
+		if buf.Len()+details.Len()+section.Len() > maxTotalBytes {
+			truncated++
+			continue
+		}
+		details.Write(section.Bytes())
+	}
+	buf.Write(details.Bytes())
+	if truncated > 0 {
+		fmt.Fprintf(&buf, "> :scissors: %d further diff section(s) omitted to keep this comment under GitHub's size limit.\n", truncated)
 	}
 
 	outputPath := "/tmp/comment-body.md"

@@ -1,0 +1,158 @@
+---
+# Stage 2: custom resources that require their operator/CRDs to exist first.
+# Each entry `dependsOn` the matching stage-1 Kustomization from
+# flux-releases.yaml.
+#
+# `wait: true` is intentionally only set on cert-manager-resources (whose
+# Certificate/ClusterIssuer health Flux can assess). The other CRs (Gateway API,
+# NodeFeatureRule, PodMonitor, ...) have no kstatus-compatible readiness, so
+# waiting on them would just hit the timeout.
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cert-manager-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  wait: true
+  path: ./k8s/infrastructure/cert-manager/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: cert-manager-operators
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: metallb-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  path: ./k8s/infrastructure/metallb/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: metallb-operators
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: longhorn-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  path: ./k8s/infrastructure/longhorn/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: longhorn-operators
+    # The longhorn HTTPRoute needs the Gateway API CRDs and the Gateway object.
+    - name: envoy-gateway-resources
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  path: ./k8s/infrastructure/envoy-gateway/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: envoy-gateway-operators
+    - name: cert-manager-resources
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: intel-device-plugin-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  path: ./k8s/infrastructure/intel-device-plugin/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: intel-device-plugin-operators
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: node-feature-discovery-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  path: ./k8s/infrastructure/node-feature-discovery/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: node-feature-discovering-operators
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: monitoring-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  path: ./k8s/infrastructure/monitoring/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: monitoring-operators
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets-resources
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  retryInterval: 1m0s
+  timeout: 5m0s
+  path: ./k8s/infrastructure/external-secrets/resources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: external-secrets
+    - name: cert-manager-resources

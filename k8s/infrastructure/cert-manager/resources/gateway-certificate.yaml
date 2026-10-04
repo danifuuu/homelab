@@ -1,0 +1,17 @@
+---
+# Wildcard certificate used by the homelab-gateway HTTPS listener. The secret
+# (homelab-wildcard-tls) is referenced by the Gateway in
+# envoy-gateway/resources/gateway.yaml.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: homelab-wildcard
+  namespace: default
+spec:
+  secretName: homelab-wildcard-tls
+  issuerRef:
+    name: homelab-ca
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - "*.homelab.home.arpa"

@@ -1,0 +1,20 @@
+---
+# TLS for the Bitwarden SDK server. The default secret name expected by the
+# bitwarden-sdk-server chart is bitwarden-tls-certs. Its ca.crt is referenced by
+# the ClusterSecretStore caProvider.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bitwarden-sdk-server
+  namespace: external-secrets
+spec:
+  secretName: bitwarden-tls-certs
+  issuerRef:
+    name: homelab-ca
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+    - bitwarden-sdk-server
+    - bitwarden-sdk-server.external-secrets
+    - bitwarden-sdk-server.external-secrets.svc
+    - bitwarden-sdk-server.external-secrets.svc.cluster.local

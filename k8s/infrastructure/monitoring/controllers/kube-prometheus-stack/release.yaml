@@ -63,7 +63,8 @@ spec:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
       defaultDashboardsEnabled: false
-      adminPassword: flux
+      admin:
+        existingSecret: grafana-admin
       sidecar:
         dashboards:
           folderAnnotation: grafana_folder
