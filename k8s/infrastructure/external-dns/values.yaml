@@ -38,6 +38,7 @@ provider:
         value: debug
       - name: DRY_RUN
         value: "false"
+policy: upsert-only
 extraArgs:
   - --source=service
   - --source=gateway-httproute
