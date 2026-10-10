@@ -30,7 +30,7 @@ spec:
         # adapter, derived from the image itself so it survives image bumps; if upstream ever
         # changes the constant the substitution stops matching and the upstream value stands.
         - name: coach-output-cap
-          image: ghcr.io/duartesantos8/opengym-api:1.3.9
+          image: ghcr.io/duartesantos8/opengym-api:1.4.1
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c"]
           args:
@@ -68,7 +68,7 @@ spec:
         - name: api
           # Pin the API and web images to one release and move them together; a restarted
           # pod should never come back on a version that was not chosen.
-          image: ghcr.io/duartesantos8/opengym-api:1.3.9
+          image: ghcr.io/duartesantos8/opengym-api:1.4.1
           imagePullPolicy: IfNotPresent
           env:
             - name: PORT
