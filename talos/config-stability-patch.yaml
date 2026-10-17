@@ -1,0 +1,34 @@
+# talosctl -n <CP_IP> patch mc --patch @talos/config-stability-patch.yaml
+#
+# Control-plane stability workaround.
+#
+# etcd runs on a slow HDD and occasionally stalls for longer than the default
+# 15s leader-election lease. kube-scheduler and kube-controller-manager then
+# lose their leader lease and exit (CrashLoopBackOff), which leaves the
+# cluster unable to schedule pods until they come back.
+#
+# SAFETY: this is only acceptable while the cluster has a SINGLE control-plane
+# node. With a second control plane both instances would consider themselves
+# leaders at the same time and can corrupt cluster state. Remove or relax this
+# patch before adding another CP node.
+#
+# Alternative if real leader election is required: keep leader election
+# enabled and raise the timeouts instead, e.g.
+#   --leader-elect-lease-duration=60s
+#   --leader-elect-renew-deadline=30s
+#   --leader-elect-retry-period=5s
+#
+# Applying this patch restarts kube-scheduler, kube-controller-manager and
+# etcd, so expect a brief API/scheduling outage.
+cluster:
+  scheduler:
+    extraArgs:
+      leader-elect: "false"
+  controllerManager:
+    extraArgs:
+      leader-elect: "false"
+  etcd:
+    extraArgs:
+      # 2379/2380 stay on the node and peer networks; 2381 serves Prometheus
+      # metrics over plain HTTP so the monitoring stack can scrape them.
+      listen-metrics-urls: "http://0.0.0.0:2381"
