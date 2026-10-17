@@ -33,6 +33,31 @@ spec:
               targetLabel: node
     alertmanager:
       enabled: true
+      # Route alerts through the chart-managed config instead of an
+      # AlertmanagerConfig CR: the operator in this setup selected no CRs, and
+      # a mounted credentials_file keeps the webhook token out of git.
+      config:
+        route:
+          receiver: telegram
+          group_by: [alertname, namespace]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h
+          routes:
+            - receiver: "null"
+              matchers:
+                - alertname = "Watchdog"
+        receivers:
+          - name: "null"
+          - name: telegram
+            webhook_configs:
+              - url: http://telegram-bot.telegram-bot.svc.cluster.local/alertmanager
+                send_resolved: true
+                max_alerts: 10
+                http_config:
+                  authorization:
+                    type: Bearer
+                    credentials_file: /etc/alertmanager/secrets/alertmanager-telegram-webhook/WEBHOOK_SECRET
       alertmanagerSpec:
         nodeSelector:
           node-role.kubernetes.io/worker: ""
@@ -43,8 +68,10 @@ spec:
             memory: 32Mi
           limits:
             memory: 128Mi
-        alertmanagerConfigSelector: {}
-        alertmanagerConfigNamespaceSelector: {}
+        # Mounted at /etc/alertmanager/secrets/<name>; populated by the
+        # ExternalSecret in k8s/infrastructure/monitoring/resources.
+        secrets:
+          - alertmanager-telegram-webhook
       # No persistence on purpose: silences and the notification log are
       # disposable, and a Longhorn PV would add IO to the already-saturated HDD.
     prometheus:
