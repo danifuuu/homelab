@@ -21,6 +21,17 @@ talosctl apply-config --insecure --nodes <IP> --file controlplane.yaml
 talosctl bootstrap --nodes <IP>
 ```
 
+## Stability patch (control plane)
+etcd runs on a slow HDD and can stall long enough for kube-scheduler and
+kube-controller-manager to lose their leader lease and exit. Apply the patch to
+the control-plane node only (a second CP would break its assumptions):
+```bash
+talosctl -n <CP_IP> patch mc --patch @talos/config-stability-patch.yaml
+```
+This restarts kube-scheduler, kube-controller-manager and etcd, so expect a
+brief API outage. etcd metrics are then available at `<node-ip>:2381` and are
+scraped by the monitoring stack.
+
 # Upgrading talos image
 ## Generate your new talos image
 Go here: https://factory.talos.dev/ and generate your custom image.
