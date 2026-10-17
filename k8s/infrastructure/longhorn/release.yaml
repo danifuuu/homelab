@@ -17,9 +17,28 @@ spec:
       defaultClassReplicaCount: 2
     longhornUI:
       replicas: 1
+    # Single 7200rpm HDD per node shared with etcd/containerd: no HA headroom
+    # for redundant sidecars, so run one of each. snapshotter must be set
+    # explicitly (0 is falsy => chart falls back to 3 replicas).
     csi:
-      attacherReplicaCount: 2
-      provisionerReplicaCount: 2
-      resizerReplicaCount: 2
-      snapshotterReplicaCount: 0
+      attacherReplicaCount: 1
+      provisionerReplicaCount: 1
+      resizerReplicaCount: 1
+      snapshotterReplicaCount: 1
+    defaultSettings:
+      # 2 nodes / single disk: 2 replicas preserves redundancy without a third
+      # copy of every write; a single rebuild stream per node keeps foreground
+      # IO usable while a replica is being repaired.
+      defaultReplicaCount: 2
+      concurrentReplicaRebuildPerNodeLimit: 1
+      # Longhorn defaults to 8s, too short for a contended spinning disk; the
+      # engine would otherwise mark healthy replicas as failed and trigger
+      # rebuilds (more IO). Also serialize engine upgrades to cap IO spikes.
+      engineReplicaTimeout: 30
+      concurrentAutomaticEngineUpgradePerNodeLimit: 1
+    # Prometheus scrapes all ServiceMonitors; required for the
+    # longhorn_volume_robustness alert rules.
+    metrics:
+      serviceMonitor:
+        enabled: true
 
