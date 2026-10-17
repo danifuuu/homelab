@@ -4,6 +4,8 @@ namespace: monitoring
 resources:
   - podmonitor.yaml
   - prometheus-rules.yaml
+  - alertmanagerconfig.yaml
+  - externalsecret-telegram-webhook.yaml
 configMapGenerator:
   - name: flux-grafana-dashboards
     files:

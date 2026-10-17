@@ -32,7 +32,21 @@ spec:
               sourceLabels: [__meta_kubernetes_pod_node_name]
               targetLabel: node
     alertmanager:
-      enabled: false
+      enabled: true
+      alertmanagerSpec:
+        nodeSelector:
+          node-role.kubernetes.io/worker: ""
+        replicas: 1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+        alertmanagerConfigSelector: {}
+        alertmanagerConfigNamespaceSelector: {}
+      # No persistence on purpose: silences and the notification log are
+      # disposable, and a Longhorn PV would add IO to the already-saturated HDD.
     prometheus:
       prometheusSpec:
         nodeSelector:
