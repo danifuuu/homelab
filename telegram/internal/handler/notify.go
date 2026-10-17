@@ -1,5 +1,5 @@
-// Package handler provides the HTTP webhook handler that receives m3uparser
-// notifications and forwards them to Telegram.
+// Package handler provides the HTTP webhook handlers that forward m3uparser
+// notifications and Alertmanager alerts to Telegram.
 package handler
 
 import (
@@ -9,9 +9,21 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/dani/homelab/telegram/internal/telegram"
 )
+
+// sender delivers a MarkdownV2-formatted message to a chat.
+type sender interface {
+	Send(text string) error
+}
+
+// authorized reports whether the request carries the shared-secret Bearer
+// token. An empty secret disables auth.
+func authorized(r *http.Request, secret string) bool {
+	if secret == "" {
+		return true
+	}
+	return r.Header.Get("Authorization") == "Bearer "+secret
+}
 
 // MediaItem represents a single piece of added or removed media.
 type MediaItem struct {
@@ -40,12 +52,12 @@ type Notification struct {
 
 // NotifyHandler handles POST /notify requests.
 type NotifyHandler struct {
-	tg     *telegram.Client
+	tg     sender
 	secret string // optional shared secret checked in Authorization header
 }
 
 // New creates a NotifyHandler.  secret may be empty to disable auth.
-func New(tg *telegram.Client, secret string) *NotifyHandler {
+func New(tg sender, secret string) *NotifyHandler {
 	return &NotifyHandler{tg: tg, secret: secret}
 }
 
@@ -55,12 +67,9 @@ func (h *NotifyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.secret != "" {
-		auth := r.Header.Get("Authorization")
-		if auth != "Bearer "+h.secret {
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
-			return
-		}
+	if !authorized(r, h.secret) {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
 	}
 
 	var n Notification

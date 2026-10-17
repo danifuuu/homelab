@@ -1,6 +1,6 @@
 // Bot is the homelab Telegram notification bot.
-// It exposes a single HTTP endpoint (POST /notify) that receives structured
-// notifications from other services and forwards them to a configured chat.
+// It exposes HTTP endpoints (POST /notify and POST /alertmanager) that receive
+// structured notifications from other services and forward them to a configured chat.
 package main
 
 import (
@@ -39,6 +39,7 @@ func run() error {
 
 	mux := http.NewServeMux()
 	mux.Handle("/notify", handler.New(tg, secret))
+	mux.Handle("/alertmanager", handler.NewAlertmanager(tg, secret))
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
