@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: monitoring
 resources:
   - podmonitor.yaml
+  - prometheus-rules.yaml
 configMapGenerator:
   - name: flux-grafana-dashboards
     files:

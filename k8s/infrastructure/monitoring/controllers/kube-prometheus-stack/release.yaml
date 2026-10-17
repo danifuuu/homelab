@@ -59,6 +59,12 @@ spec:
     kube-state-metrics:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+    # etcd metrics are exposed by the Talos patch on the control-plane node IP.
+    # Chart defaults already set port 2381 and scheme http.
+    kubeEtcd:
+      enabled: true
+      endpoints:
+        - 192.168.1.5
     grafana:
       nodeSelector:
         node-role.kubernetes.io/worker: ""

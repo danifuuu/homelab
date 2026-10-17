@@ -1,0 +1,139 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homelab-failure-modes
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: node-disk
+      rules:
+        - alert: NodeDiskSaturation
+          expr: 'max by (instance) (rate(node_disk_io_time_weighted_seconds_total{device="sda"}[5m]) / rate(node_disk_io_time_seconds_total{device="sda"}[5m])) > 0.05'
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Disk sda saturated on {{ $labels.instance }}"
+            description: "Average IO await is {{ $value }}s (> 50ms)."
+        - alert: NodeHighIOWait
+          expr: 'avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 25'
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High IO wait on {{ $labels.instance }}"
+            description: "{{ $value }}% of CPU time is spent in iowait."
+        - alert: NodeFilesystemAlmostFull
+          expr: 'node_filesystem_avail_bytes{mountpoint="/var"} / node_filesystem_size_bytes{mountpoint="/var"} * 100 < 15'
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "/var almost full on {{ $labels.instance }}"
+            description: "Only {{ $value }}% of /var remains available."
+    - name: control-plane
+      rules:
+        - alert: ControlPlaneComponentRestarting
+          expr: 'increase(kube_pod_container_status_restarts_total{namespace="kube-system",pod=~"kube-scheduler-.*|kube-controller-manager-.*|kube-apiserver-.*"}[15m]) > 0'
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.pod }} is restarting"
+            description: "{{ $value }} restarts in the last 15m."
+        - alert: APIServerLatencyHigh
+          expr: 'histogram_quantile(0.99, sum by (le) (rate(apiserver_request_duration_seconds_bucket{verb!~"WATCH|CONNECT"}[5m]))) > 5'
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "apiserver p99 latency is {{ $value }}s"
+            description: "API requests take over 5s at p99."
+        - alert: APIServerErrors
+          expr: 'sum(rate(apiserver_request_total{code=~"5.."}[5m])) / sum(rate(apiserver_request_total[5m])) > 0.05'
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "apiserver is returning 5xx errors"
+            description: "{{ $value }} of API requests fail with 5xx."
+    - name: etcd
+      rules:
+        - alert: EtcdMetricsAbsent
+          expr: absent(etcd_server_has_leader)
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Prometheus cannot scrape etcd metrics"
+            description: "etcd metrics have been missing for 30m; control-plane health is blind."
+        - alert: EtcdFsyncSlow
+          expr: 'histogram_quantile(0.99, rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m])) > 0.5'
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "etcd WAL fsync is slow on {{ $labels.instance }}"
+            description: "p99 fsync is {{ $value }}s, signalling disk saturation."
+        - alert: EtcdApplySlow
+          expr: 'histogram_quantile(0.99, rate(etcd_disk_backend_commit_duration_seconds_bucket[5m])) > 0.5'
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "etcd backend commit is slow on {{ $labels.instance }}"
+            description: "p99 backend commit is {{ $value }}s."
+        - alert: EtcdLeaderChanges
+          expr: 'increase(etcd_server_leader_changes_seen_total[15m]) > 0'
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "etcd leader changed on {{ $labels.instance }}"
+            description: "{{ $value }} leader changes in the last 15m."
+    - name: longhorn
+      rules:
+        - alert: LonghornVolumeDegraded
+          expr: 'longhorn_volume_robustness{state="degraded"} == 1'
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Longhorn volume {{ $labels.volume }} is degraded"
+            description: "Rebuilding or running with fewer replicas for 30m."
+        - alert: LonghornVolumeFaulted
+          expr: 'longhorn_volume_robustness{state="faulted"} == 1'
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn volume {{ $labels.volume }} is faulted"
+            description: "Volume is unavailable and needs attention."
+    - name: nodes
+      rules:
+        - alert: NodeNotReady
+          expr: 'kube_node_status_condition{condition="Ready",status="true"} == 0'
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.node }} is not ready"
+            description: "Node has been NotReady for 5m."
+        - alert: NodeMemoryHigh
+          expr: '(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 90'
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Memory pressure on {{ $labels.instance }}"
+            description: "{{ $value }}% of memory is in use."
+        - alert: PodCrashLooping
+          expr: 'increase(kube_pod_container_status_restarts_total[15m]) > 2'
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+            description: "{{ $value }} restarts in the last 15m."
