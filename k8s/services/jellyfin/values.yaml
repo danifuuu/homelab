@@ -56,8 +56,9 @@ startupProbe:
   failureThreshold: 60
 
 livenessProbe:
-  initialDelaySeconds: 30
+  initialDelaySeconds: 120
   timeoutSeconds: 5
+  failureThreshold: 60
 
 readinessProbe:
   initialDelaySeconds: 30
