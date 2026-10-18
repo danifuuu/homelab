@@ -137,3 +137,35 @@ spec:
           annotations:
             summary: "{{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
             description: "{{ $value }} restarts in the last 15m."
+    # The node rule above only watches /var. PVCs are separate filesystems and
+    # a full one breaks the workload (SQLite writes, chunk uploads) without
+    # touching the node disk - jellyfin-config sat at 87% unnoticed.
+    - name: persistent-volumes
+      rules:
+        - alert: PersistentVolumeFillingUp
+          expr: |
+            kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.85
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
+            description: "Less than 15% free for 30m. Grow the PVC or clean up."
+        - alert: PersistentVolumeFull
+          expr: |
+            kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.95
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
+            description: "Workload writes are about to fail."
+        - alert: PersistentVolumeStatsAbsent
+          expr: |
+            absent(kubelet_volume_stats_used_bytes{namespace="monitoring"})
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "kubelet volume stats are not being scraped"
+            description: "The PVC capacity alerts above would not fire."
