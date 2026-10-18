@@ -20,6 +20,14 @@ spec:
       type: daemonset
 
     alloy:
+      # Alloy tails every pod log on the node; it reached ~550Mi on the CP
+      # with no bounds. Keep it well below the node's memory pressure point.
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 1Gi
       mounts:
         # Mount /var/log from the host to read pod log files
         varlog: true
