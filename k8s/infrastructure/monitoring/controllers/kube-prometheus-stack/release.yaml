@@ -151,7 +151,43 @@ spec:
       admin:
         existingSecret: grafana-admin
       sidecar:
+        # The datasources are declared statically below. The discovery sidecar
+        # was a second Python container (~100Mi) watching ConfigMaps for a
+        # fixed set of three datasources.
+        datasources:
+          enabled: false
         dashboards:
           folderAnnotation: grafana_folder
           provider:
             foldersFromFilesStructure: true
+      # grafana chart 8.x renders `datasources` as <filename>: <file contents>
+      # and mounts each key at
+      # /etc/grafana/provisioning/datasources/<filename>.
+      # uid: prometheus is required - dashboards/flux/cluster.json references
+      # that uid directly (the other dashboards use ${DS_*} variables).
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+            - name: Prometheus
+              type: prometheus
+              uid: prometheus
+              url: http://kube-prometheus-stack-prometheus.monitoring:9090/
+              access: proxy
+              isDefault: true
+              jsonData:
+                httpMethod: POST
+                timeInterval: 30s
+            - name: Alertmanager
+              type: alertmanager
+              uid: alertmanager
+              url: http://kube-prometheus-stack-alertmanager.monitoring:9093/
+              access: proxy
+              jsonData:
+                handleGrafanaManagedAlerts: false
+                implementation: prometheus
+            - name: Loki
+              type: loki
+              uid: loki
+              url: http://loki:3100
+              access: proxy

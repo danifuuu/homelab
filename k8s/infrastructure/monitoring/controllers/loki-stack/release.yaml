@@ -21,38 +21,38 @@ spec:
       enabled: false
     test:
       enabled: false
-    # following https://github.com/fluxcd/flux2-monitoring-example/pull/23/files#diff-5e041afacf25eb055565b4a1c32d5b81201ddce29c84adf13a6ae88463e0832b
-    extraObjects:
-      - apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: loki-datasource
-          labels:
-            app: loki
-            chart: loki
-            release: loki
-            grafana_datasource: "1"
-            app.kubernetes.io/part-of: kube-prometheus-stack
-        data:
-          loki-datasource.yaml: |-
-            apiVersion: 1
-            datasources:
-            - name: Loki
-              type: loki
-              access: proxy
-              url: http://loki:{{ .Values.loki.server.http_listen_port }}
-              version: 1
-              isDefault: false
+    # The Loki datasource is now declared in the Grafana values
+    # (controllers/kube-prometheus-stack/release.yaml, grafana.datasources)
+    # instead of being discovered by the Grafana sidecar.
+    # Nothing writes Loki rules, so this sidecar watched for `loki_rule`
+    # ConfigMaps forever at ~80Mi RSS for no benefit.
+    sidecar:
+      rules:
+        enabled: false
     loki:
       auth_enabled: false
       serviceMonitor:
         enabled: true
         labels:
           app.kubernetes.io/part-of: kube-prometheus-stack
+      # Single-node homelab: chunks go to the PVC already mounted at
+      # /var/loki instead of a chart-bundled MinIO. Drops a StatefulSet,
+      # 2x5Gi volumes and ~330Mi of RAM; an S3 endpoint bought nothing at
+      # one replica.
+      storage:
+        type: filesystem
       limits_config:
         allow_structured_metadata: true
         retention_period: 168h # 7 days
         volume_enabled: true
+      # Retention is only enforced by the compactor, and Loki 3.x refuses to
+      # start with retention_enabled unless delete_request_store is set. The
+      # previous config had neither, so `retention_period` above was a no-op:
+      # loki_compactor_apply_retention_last_successful_run_timestamp_seconds
+      # was 0 and the MinIO volumes were 98% full.
+      compactor:
+        retention_enabled: true
+        delete_request_store: filesystem
       # https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
       commonConfig:
         replication_factor: 1
@@ -60,7 +60,7 @@ spec:
         configs:
           - from: "2024-04-01"
             store: tsdb
-            object_store: s3
+            object_store: filesystem
             schema: v13
             index:
               prefix: loki_index_
@@ -69,14 +69,16 @@ spec:
         enabled: true
       ruler:
         enable_api: true
+      # With MinIO gone the chart falls back to local ruler storage; give it an
+      # explicit directory so the rendered config is valid.
+      rulerConfig:
+        storage:
+          type: local
+          local:
+            directory: /var/loki/rules
+    # Chunks now live on the singleBinary PVC (10Gi, /var/loki).
     minio:
-      enabled: true
-      resources:
-        requests:
-          cpu: 50m
-          memory: 128Mi
-        limits:
-          memory: 512Mi
+      enabled: false
     lokiCanary:
       enabled: false
     gateway:
