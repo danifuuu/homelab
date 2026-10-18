@@ -4,6 +4,10 @@ metadata:
   name: kube-prometheus-stack
 spec:
   interval: 1h
+  # Grafana runs SQLite migrations on the shared HDD. When Longhorn is
+  # rebuilding, startup can take several minutes; the default 5m Helm
+  # timeout aborts the upgrade before it finishes.
+  timeout: 15m
   chartRef:
     kind: OCIRepository
     name: kube-prometheus-stack
@@ -138,6 +142,11 @@ spec:
           memory: 128Mi
         limits:
           memory: 768Mi
+      # The default probe (initialDelay 60s, 10x10s failures) kills Grafana
+      # mid-migration when the HDD is busy with Longhorn rebuilds.
+      livenessProbe:
+        initialDelaySeconds: 120
+        failureThreshold: 60
       defaultDashboardsEnabled: false
       admin:
         existingSecret: grafana-admin
