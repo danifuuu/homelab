@@ -39,7 +39,7 @@
   "panels": [
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-      "description": "CPU usage per node, matching `kubectl top nodes` (kubelet accounting; iowait is not counted as usage).",
+      "description": "CPU usage per node from the kubelet's instantaneous CPU rate, matching `kubectl top nodes` (iowait is not counted as usage).",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -73,7 +73,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "100 * sum by (node) (rate(node_cpu_usage_seconds_total{metrics_path=\"/metrics/resource\", node=~\"$node\"}[5m])) / max by (node) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", node=~\"$node\"})",
+          "expr": "100 * sum by (node) (irate(node_cpu_usage_seconds_total{metrics_path=\"/metrics/resource\", node=~\"$node\"}[5m])) / max by (node) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", node=~\"$node\"})",
           "instant": true,
           "legendFormat": "{{node}}",
           "refId": "A"
@@ -181,7 +181,7 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-      "description": "CPU utilisation per node from kubelet accounting (matches `kubectl top nodes`); iowait is not counted as CPU usage.",
+      "description": "CPU utilisation per node from the kubelet's instantaneous CPU rate (matches `kubectl top nodes`); iowait is not counted as CPU usage.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -227,7 +227,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "100 * sum by (node) (rate(node_cpu_usage_seconds_total{metrics_path=\"/metrics/resource\", node=~\"$node\"}[5m])) / max by (node) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", node=~\"$node\"})",
+          "expr": "100 * sum by (node) (irate(node_cpu_usage_seconds_total{metrics_path=\"/metrics/resource\", node=~\"$node\"}[5m])) / max by (node) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", node=~\"$node\"})",
           "legendFormat": "{{node}}",
           "refId": "A"
         }
