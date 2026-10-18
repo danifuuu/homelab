@@ -8,3 +8,27 @@ spec:
   chartRef:
     kind: OCIRepository
     name: node-feature-discovery
+  values:
+    # NFD is useful but not latency-sensitive; the chart defaults reserve
+    # 100m CPU on the master and 1Gi+ memory limits on the other components.
+    master:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+    worker:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 32Mi
+        limits:
+          memory: 128Mi
+    gc:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi

@@ -5,6 +5,11 @@ metadata:
   namespace: default
 spec:
   gatewayClassName: default-gateway-class
+  infrastructure:
+    parametersRef:
+      group: gateway.envoyproxy.io
+      kind: EnvoyProxy
+      name: homelab-proxy
   listeners:
   - name: http
     protocol: HTTP
