@@ -31,6 +31,12 @@ spec:
             - action: replace
               sourceLabels: [__meta_kubernetes_pod_node_name]
               targetLabel: node
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 64Mi
     alertmanager:
       enabled: true
       # Route alerts through the chart-managed config instead of an
@@ -79,10 +85,15 @@ spec:
         nodeSelector:
           node-role.kubernetes.io/worker: ""
         retention: 24h
+        # Prometheus uses an emptyDir (no storageSpec); cap the TSDB so a busy
+        # week cannot fill /var/lib/kubelet on the node.
+        retentionSize: 4GB
         resources:
           requests:
-            cpu: 200m
-            memory: 200Mi
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            memory: 1Gi
         podMonitorNamespaceSelector: { }
         podMonitorSelector:
           matchLabels:
@@ -97,9 +108,21 @@ spec:
     prometheusOperator:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
     kube-state-metrics:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
     # etcd metrics are exposed by the Talos patch on the control-plane node IP.
     # Chart defaults already set port 2381 and scheme http.
     kubeEtcd:
@@ -109,6 +132,12 @@ spec:
     grafana:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 768Mi
       defaultDashboardsEnabled: false
       admin:
         existingSecret: grafana-admin
