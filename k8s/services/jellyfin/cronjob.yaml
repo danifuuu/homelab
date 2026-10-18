@@ -17,9 +17,19 @@ spec:
             app: m3uparser
         spec:
           restartPolicy: Never
+          # The media PVC is ReadWriteOnce now; the job must run on the same
+          # node as Jellyfin or it cannot attach the volume.
+          nodeSelector:
+            node-role.kubernetes.io/worker: ""
           containers:
             - name: m3uparser
               image: danifuu/m3uparser:go-latest
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
               envFrom:
                 - secretRef:
                     name: jellyfin-secret

@@ -53,6 +53,14 @@ spec:
           discovery.relabel "pods" {
             targets = discovery.kubernetes.pods.targets
 
+            // The Longhorn CSI liveness sidecar logs on every probe; it is
+            // pure noise and it lands on the same HDD as Loki.
+            rule {
+              source_labels = ["__meta_kubernetes_pod_container_name"]
+              regex         = "longhorn-liveness-probe"
+              action        = "drop"
+            }
+
             rule {
               source_labels = ["__meta_kubernetes_namespace"]
               target_label  = "namespace"
@@ -92,10 +100,12 @@ spec:
             }
           }
 
-          // Watch the log files resolved by discovery
+          // Watch the log files resolved by discovery. Re-globbing
+          // /var/log/pods every 5s is constant CPU and IO on a node with a
+          // single HDD; new pods are picked up within 30s either way.
           local.file_match "pods" {
             path_targets = discovery.relabel.pods.output
-            sync_period  = "5s"
+            sync_period  = "30s"
           }
 
           // Tail matched log files and forward to processing

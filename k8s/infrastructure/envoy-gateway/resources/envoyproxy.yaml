@@ -22,8 +22,9 @@ spec:
             node-role.kubernetes.io/worker: ""
         container:
           resources:
+            # Observed ~30-40Mi; the 256Mi limit stays as burst headroom.
             requests:
-              cpu: 50m
-              memory: 128Mi
+              cpu: 25m
+              memory: 64Mi
             limits:
               memory: 256Mi

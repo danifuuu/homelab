@@ -138,8 +138,9 @@ spec:
         node-role.kubernetes.io/worker: ""
       resources:
         requests:
+          # The dashboard sidecar plus Grafana settle around 200-240Mi.
           cpu: 50m
-          memory: 128Mi
+          memory: 192Mi
         limits:
           memory: 768Mi
       # The default probe (initialDelay 60s, 10x10s failures) kills Grafana

@@ -65,17 +65,14 @@ spec:
             index:
               prefix: loki_index_
               period: 24h
+      # Grafana's Patterns/Drilldown is not used, and during log catch-up it
+      # rejected 8MB batches ("received message larger than max").
       pattern_ingester:
-        enabled: true
-      ruler:
-        enable_api: true
-      # With MinIO gone the chart falls back to local ruler storage; give it an
-      # explicit directory so the rendered config is valid.
-      rulerConfig:
-        storage:
-          type: local
-          local:
-            directory: /var/loki/rules
+        enabled: false
+    # No Loki recording rules exist; the ruler only adds a ring and WAL writes
+    # under /var/loki/ruler-wal.
+    ruler:
+      enabled: false
     # Chunks now live on the singleBinary PVC (10Gi, /var/loki).
     minio:
       enabled: false
@@ -95,6 +92,10 @@ spec:
       replicas: 1
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+      # Logs are disposable: do not write a second replica of every chunk to
+      # the other node's HDD.
+      persistence:
+        storageClass: longhorn-single
       # Loki was ~360Mi with no bounds; cap it so a log burst cannot take the
       # worker down.
       resources:

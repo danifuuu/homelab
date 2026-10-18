@@ -24,9 +24,10 @@ spec:
       # rebuilding. Give it room instead of reporting the node as unknown.
       - --kubelet-request-timeout=30s
     resources:
+      # Observed ~5m / ~22Mi.
       requests:
-        cpu: 50m
-        memory: 100Mi
+        cpu: 20m
+        memory: 48Mi
       limits:
         memory: 256Mi
   install:

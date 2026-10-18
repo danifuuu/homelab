@@ -1,0 +1,25 @@
+# Second StorageClass for data that does not need redundancy.
+#
+# Each node has a single HDD and every volume on the default `longhorn` class
+# keeps 2 replicas, so the logs (Loki) and the re-downloadable exercise media
+# (opengym) pay double write IO - the cluster's bottleneck - for a copy that is
+# worthless if the node holding the only other one is gone. Everything else
+# keeps using the default class.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-single
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "1"
+  staleReplicaTimeout: "30"
+  fromBackup: ""
+  fsType: "ext4"
+  dataLocality: "disabled"
+  unmapMarkSnapChainRemoved: "ignored"
+  disableRevisionCounter: "true"
+  dataEngine: "v1"
+  backupTargetName: "default"

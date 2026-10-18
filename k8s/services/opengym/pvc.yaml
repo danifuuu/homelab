@@ -13,6 +13,8 @@ spec:
       storage: 2Gi
 ---
 # Exercise images and GIFs (~140 MB), downloaded again by the media initContainer if lost.
+# Deliberately single-replica: it is regenerable, and every write on the default
+# class costs a second copy on the other node's HDD.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -20,7 +22,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: longhorn
+  storageClassName: longhorn-single
   resources:
     requests:
       storage: 2Gi

@@ -12,15 +12,23 @@
 
 persistence:
   config:
-    size: 50Gi # Increased size to store logs/metadata
+    # The .strm catalog is ~6.9k titles and Jellyfin pulls artwork for all of
+    # them; this volume reached 87% (43G/49G). Longhorn allows expansion, so
+    # grow it rather than break SQLite.
+    size: 80Gi
   media:
-    accessMode: ReadWriteMany
+    # Only Jellyfin and the m3uparser CronJob (pinned to the worker) mount
+    # this, and both run on the same node. RWO removes the NFS share-manager
+    # (~177Mi) and its extra hop.
+    accessMode: ReadWriteOnce
 
 # finally! adding gpu support for hardware acceleration of transcoding tasks
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
+    # 24h peaks are ~180m CPU and ~456Mi; request generously so the scheduler
+    # accounts for it and Jellyfin is not an early eviction candidate.
+    cpu: 200m
+    memory: 512Mi
   limits:
     cpu: "2"
     memory: 1Gi

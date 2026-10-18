@@ -40,6 +40,11 @@ spec:
         timeoutSeconds: 5
         failureThreshold: 6
     speaker:
+      # cp-01 carries node.kubernetes.io/exclude-from-external-load-balancers
+      # and the Gateway/Envoy proxy is pinned to the worker, so the control
+      # plane speaker never announces anything.
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       resources:
         requests:
           cpu: 10m
