@@ -1,0 +1,40 @@
+---
+# Metrics served by kubelet on /metrics/resource are the same numbers that
+# `kubectl top nodes` displays (via metrics-server): node_cpu_usage_seconds_total
+# and node_memory_working_set_bytes. The chart-managed kubelet ServiceMonitor
+# only scrapes /metrics, /metrics/cadvisor and /metrics/probes, so scrape the
+# resource endpoint separately to keep the Nodes dashboard consistent with
+# `kubectl top`.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kubelet-resource-metrics
+  labels:
+    app.kubernetes.io/part-of: homelab-monitoring
+spec:
+  jobLabel: k8s-app
+  namespaceSelector:
+    matchNames:
+      - kube-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kubelet
+      k8s-app: kubelet
+  endpoints:
+    - port: https-metrics
+      path: /metrics/resource
+      scheme: https
+      interval: 30s
+      scrapeTimeout: 10s
+      honorLabels: true
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      tlsConfig:
+        caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecureSkipVerify: true
+      relabelings:
+        # Expose the scrape path as a label so the dashboard can select these
+        # series without relying on the shared `job="kubelet"` label.
+        - action: replace
+          sourceLabels:
+            - __metrics_path__
+          targetLabel: metrics_path
