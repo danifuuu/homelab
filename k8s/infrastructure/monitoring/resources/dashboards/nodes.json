@@ -39,7 +39,7 @@
   "panels": [
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-      "description": "Current CPU usage across selected nodes",
+      "description": "CPU usage per node, matching `kubectl top nodes` (kubelet accounting; iowait is not counted as usage).",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -73,7 +73,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "avg by (node) (1 - rate(node_cpu_seconds_total{node=~\"$node\", mode=\"idle\"}[5m])) * 100",
+          "expr": "100 * sum by (node) (rate(node_cpu_usage_seconds_total{metrics_path=\"/metrics/resource\", node=~\"$node\"}[5m])) / max by (node) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", node=~\"$node\"})",
           "instant": true,
           "legendFormat": "{{node}}",
           "refId": "A"
@@ -84,7 +84,7 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-      "description": "Current memory usage across selected nodes",
+      "description": "Memory usage per node, matching `kubectl top nodes`: kubelet working set / allocatable memory.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -118,7 +118,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "(1 - node_memory_MemAvailable_bytes{node=~\"$node\"} / node_memory_MemTotal_bytes{node=~\"$node\"}) * 100",
+          "expr": "100 * sum by (node) (node_memory_working_set_bytes{metrics_path=\"/metrics/resource\", node=~\"$node\"}) / max by (node) (kube_node_status_allocatable{resource=\"memory\", unit=\"byte\", node=~\"$node\"})",
           "instant": true,
           "legendFormat": "{{node}}",
           "refId": "A"
@@ -181,7 +181,7 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-      "description": "CPU utilisation per node (idle subtracted from 100%)",
+      "description": "CPU utilisation per node from kubelet accounting (matches `kubectl top nodes`); iowait is not counted as CPU usage.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -227,7 +227,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "avg by (node) (1 - rate(node_cpu_seconds_total{node=~\"$node\", mode=\"idle\"}[5m])) * 100",
+          "expr": "100 * sum by (node) (rate(node_cpu_usage_seconds_total{metrics_path=\"/metrics/resource\", node=~\"$node\"}[5m])) / max by (node) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", node=~\"$node\"})",
           "legendFormat": "{{node}}",
           "refId": "A"
         }
@@ -244,7 +244,7 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-      "description": "Memory used and available per node",
+      "description": "Memory working set and remaining allocatable memory per node (matches `kubectl top nodes`).",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -286,23 +286,23 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "node_memory_MemTotal_bytes{node=~\"$node\"} - node_memory_MemAvailable_bytes{node=~\"$node\"}",
-          "legendFormat": "used — {{node}}",
+          "expr": "sum by (node) (node_memory_working_set_bytes{metrics_path=\"/metrics/resource\", node=~\"$node\"})",
+          "legendFormat": "working set — {{node}}",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "node_memory_MemAvailable_bytes{node=~\"$node\"}",
+          "expr": "max by (node) (kube_node_status_allocatable{resource=\"memory\", unit=\"byte\", node=~\"$node\"}) - sum by (node) (node_memory_working_set_bytes{metrics_path=\"/metrics/resource\", node=~\"$node\"})",
           "legendFormat": "available — {{node}}",
           "refId": "B"
         }
       ],
-      "title": "Memory Used / Available",
+      "title": "Memory Working Set / Available",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-      "description": "Memory usage percentage per node",
+      "description": "Memory usage percentage per node: kubelet working set / allocatable (matches `kubectl top nodes`).",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -345,7 +345,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "(1 - node_memory_MemAvailable_bytes{node=~\"$node\"} / node_memory_MemTotal_bytes{node=~\"$node\"}) * 100",
+          "expr": "100 * sum by (node) (node_memory_working_set_bytes{metrics_path=\"/metrics/resource\", node=~\"$node\"}) / max by (node) (kube_node_status_allocatable{resource=\"memory\", unit=\"byte\", node=~\"$node\"})",
           "legendFormat": "{{node}}",
           "refId": "A"
         }
