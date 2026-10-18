@@ -1,0 +1,9 @@
+# Dedicated etcd data volume on the control-plane node.
+# Applies to the 64 GB NVMe SSD (E2M2 64GB) installed in the M.2 slot.
+# Talos creates a partition on the SSD and mounts it at /var/lib/etcd.
+# The existing /var/lib/etcd on the HDD remains untouched (shadowed).
+machine:
+  disks:
+    - device: /dev/nvme0n1
+      partitions:
+        - mountpoint: /var/lib/etcd

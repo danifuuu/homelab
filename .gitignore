@@ -6,6 +6,9 @@ kubeconfig
 worker.yaml
 controlplane.yaml
 
+# Talos backup artifacts (etcd snapshots contain cluster secrets)
+talos/backups/
+
 *.tfvars
 *.tfstate
 *.terraform*
