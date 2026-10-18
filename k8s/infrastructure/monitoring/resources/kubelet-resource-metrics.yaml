@@ -38,3 +38,12 @@ spec:
           sourceLabels:
             - __metrics_path__
           targetLabel: metrics_path
+      metricRelabelings:
+        # Only keep the node-level metrics. The resource endpoint also exposes
+        # container_*/pod_* series that duplicate the cadvisor scrape and would
+        # double-count panels/rules that aggregate container metrics without a
+        # metrics_path filter.
+        - action: keep
+          sourceLabels:
+            - __name__
+          regex: node_(cpu_usage_seconds_total|memory_working_set_bytes|swap_usage_bytes)
