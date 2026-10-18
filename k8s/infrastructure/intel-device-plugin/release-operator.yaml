@@ -13,3 +13,6 @@ spec:
         kind: HelmRepository
         name: intel-device-plugin
   values:
+  upgrade:
+    remediation:
+      retries: 1
