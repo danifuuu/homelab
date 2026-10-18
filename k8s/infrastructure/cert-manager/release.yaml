@@ -15,3 +15,26 @@ spec:
   values:
     crds:
       enabled: true
+    # All three controllers were BestEffort (no requests at all), so they were
+    # first in line for eviction. Sized against observed peaks (controller
+    # 48Mi, webhook 36Mi, cainjector 44Mi).
+    resources:
+      requests:
+        cpu: 5m
+        memory: 32Mi
+      limits:
+        memory: 96Mi
+    webhook:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 32Mi
+        limits:
+          memory: 96Mi
+    cainjector:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 48Mi
+        limits:
+          memory: 128Mi

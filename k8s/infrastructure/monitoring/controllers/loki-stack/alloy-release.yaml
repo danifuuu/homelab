@@ -22,10 +22,14 @@ spec:
     alloy:
       # Alloy tails every pod log on the node; it reached ~550Mi on the CP
       # with no bounds. Keep it well below the node's memory pressure point.
+      # 24h peaks are ~480Mi on the CP (kube-apiserver logs) and ~300Mi on the
+      # worker, so the old 128Mi request made it look tiny to the scheduler and
+      # put it first in line for eviction. The limit stays at 1Gi: most of the
+      # working set is page cache and capping it lower risks OOM.
       resources:
         requests:
           cpu: 50m
-          memory: 128Mi
+          memory: 256Mi
         limits:
           memory: 1Gi
       mounts:

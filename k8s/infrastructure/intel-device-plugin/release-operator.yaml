@@ -13,6 +13,14 @@ spec:
         kind: HelmRepository
         name: intel-device-plugin
   values:
+    # Chart default is 100m/100Mi, but the controller uses ~4m and ~18Mi.
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
   upgrade:
     remediation:
       retries: 1

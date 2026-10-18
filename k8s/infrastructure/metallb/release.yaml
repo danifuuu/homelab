@@ -13,3 +13,24 @@ spec:
         kind: HelmRepository
         name: metallb
         namespace: metallb-system
+  values:
+    # Only L2 (L2Advertisement) is in use - there is no BGPAdvertisement and no
+    # FRRConfiguration. frr-k8s is the BGP backend and was running two
+    # DaemonSet pods with five containers each (~250Mi total) for nothing.
+    # L2 keeps working through the speaker's memberlist.
+    frrk8s:
+      enabled: false
+    controller:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 48Mi
+        limits:
+          memory: 128Mi
+    speaker:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi

@@ -24,5 +24,12 @@ spec:
     operatorConfig:
       defaultTags:
         - tag:k8s-operator
+      # The operator was BestEffort; it peaks at ~28Mi.
+      resources:
+        requests:
+          cpu: 5m
+          memory: 32Mi
+        limits:
+          memory: 96Mi
     proxyConfig:
       defaultTags: tag:k8s
