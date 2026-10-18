@@ -17,6 +17,25 @@ spec:
       defaultClassReplicaCount: 2
     longhornUI:
       replicas: 1
+    # 2-node homelab: the chart default is 3 global-manager replicas, but only
+    # one is the active leader and the rest are warm standbys. All three landed
+    # on the worker, adding pod/CPU pressure with no availability benefit on a
+    # two-node cluster. Keep one and bound its resources.
+    longhornGlobalManager:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+    longhornManager:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 768Mi
     # Single 7200rpm HDD per node shared with etcd/containerd: no HA headroom
     # for redundant sidecars, so run one of each. snapshotter must be set
     # explicitly (0 is falsy => chart falls back to 3 replicas).
