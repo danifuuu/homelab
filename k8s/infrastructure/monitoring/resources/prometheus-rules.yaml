@@ -162,7 +162,7 @@ spec:
             description: "Workload writes are about to fail."
         - alert: PersistentVolumeStatsAbsent
           expr: |
-            absent(kubelet_volume_stats_used_bytes{namespace="monitoring"})
+            absent(kubelet_volume_stats_used_bytes)
           for: 15m
           labels:
             severity: warning
