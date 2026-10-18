@@ -1,6 +1,12 @@
 # Envoy Gateway defaults to a 544Mi memory request for the data-plane proxy,
 # while the proxy actually uses <100Mi. This EnvoyProxy is attached to the
 # homelab Gateway via spec.infrastructure.parametersRef and right-sizes it.
+#
+# The proxy is pinned to the worker because the control-plane node carries
+# node.kubernetes.io/exclude-from-external-load-balancers: MetalLB will not
+# announce the Gateway VIP (192.168.1.200) from that node, and the Envoy
+# service uses externalTrafficPolicy: Local, so a proxy scheduled on the
+# control plane makes the VIP unreachable even though the pod is healthy.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: EnvoyProxy
 metadata:
@@ -11,6 +17,9 @@ spec:
     type: Kubernetes
     kubernetes:
       envoyDeployment:
+        pod:
+          nodeSelector:
+            node-role.kubernetes.io/worker: ""
         container:
           resources:
             requests:
