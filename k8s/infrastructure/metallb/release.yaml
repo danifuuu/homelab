@@ -27,6 +27,18 @@ spec:
           memory: 48Mi
         limits:
           memory: 128Mi
+      # The chart defaults are 10s initial delay, 3 failures and a 1s timeout,
+      # with no startupProbe. On a loaded node the controller needs >40s to
+      # rotate its webhook certs and start serving /healthz on 17472, so it was
+      # killed mid-startup (3 restarts during the first rollout). Give startup
+      # ~2 minutes and a realistic per-probe timeout.
+      livenessProbe:
+        initialDelaySeconds: 30
+        timeoutSeconds: 5
+        failureThreshold: 10
+      readinessProbe:
+        timeoutSeconds: 5
+        failureThreshold: 6
     speaker:
       resources:
         requests:
