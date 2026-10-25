@@ -42,6 +42,15 @@ spec:
       enabled: false
     kubeProxy:
       enabled: false
+    # KubeCPUOvercommit assumes an HA cluster: it fires when the sum of
+    # requests no longer fits on the nodes left after losing the largest one.
+    # On this 2-node cluster that is always true (requests total 2.55 cores
+    # vs 1.95 allocatable on a single node), and losing either node is a full
+    # outage anyway, so the warning is permanent and not actionable. Keep the
+    # total-capacity and memory rules; drop only this one.
+    defaultRules:
+      disabled:
+        KubeCPUOvercommit: true
     prometheus-node-exporter:
       prometheus:
         monitor:
