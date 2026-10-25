@@ -10,13 +10,17 @@ spec:
     - name: node-disk
       rules:
         - alert: NodeDiskSaturation
-          expr: 'max by (instance) (rate(node_disk_io_time_weighted_seconds_total{device="sda"}[5m]) / rate(node_disk_io_time_seconds_total{device="sda"}[5m])) > 0.05'
+          # rate(io_time_weighted)/rate(io_time) is the average IO queue
+          # depth, not await. On this HDD it sits above 0.05 almost all the
+          # time even while the disk is only a few percent busy, so the old
+          # expression fired permanently. Alert on actual device utilisation.
+          expr: 'max by (instance) (rate(node_disk_io_time_seconds_total{device="sda"}[5m])) > 0.9'
           for: 15m
           labels:
             severity: warning
           annotations:
             summary: "Disk sda saturated on {{ $labels.instance }}"
-            description: "Average IO await is {{ $value }}s (> 50ms)."
+            description: "sda has been busy {{ $value | humanizePercentage }} of the time for 15m (> 90%)."
         - alert: NodeHighIOWait
           expr: 'avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 25'
           for: 15m
