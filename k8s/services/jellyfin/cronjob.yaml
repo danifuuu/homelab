@@ -23,7 +23,10 @@ spec:
             node-role.kubernetes.io/worker: ""
           containers:
             - name: m3uparser
-              image: danifuu/m3uparser:go-latest
+              # Built from danifuuu/m3uparser eeed1e7, which fixes the panic
+              # when sync removes a stale media directory. The old :go-latest
+              # tag is mutable and still points at the broken build.
+              image: danifuu/m3uparser:go-eeed1e7
               resources:
                 requests:
                   cpu: 50m
