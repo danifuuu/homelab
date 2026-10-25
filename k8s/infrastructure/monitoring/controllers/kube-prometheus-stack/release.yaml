@@ -28,6 +28,20 @@ spec:
     valuesKey: kube-state-metrics-config.yaml
   # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
   values:
+    # Talos runs kube-scheduler and kube-controller-manager as static pods
+    # listening on 127.0.0.1 only, and kube-proxy's metrics listener is
+    # loopback-only as well. Prometheus cannot reach any of them, so the
+    # chart's endpoints stay down and their "Down" alerts fire forever.
+    # Drop those targets (and their alert rules) instead of alerting on a
+    # blind spot that cannot be scraped without exposing control-plane
+    # metrics on every node interface. API server, etcd and kubelet metrics
+    # are still scraped.
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
     prometheus-node-exporter:
       prometheus:
         monitor:
